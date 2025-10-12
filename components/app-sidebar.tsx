@@ -35,7 +35,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
-  const { setOpenMobile } = useSidebar();
+  const { setOpenMobile, toggleSidebar } = useSidebar();
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
 
@@ -56,25 +56,46 @@ export function AppSidebar({ user }: { user: User | undefined }) {
     });
   };
 
+  const handleSidebarClick = () => {
+    toggleSidebar();
+  };
+
+  const handleSidebarAreaClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Verifica se o clique foi diretamente na área vazia (não em botões)
+    const target = e.target as HTMLElement;
+
+    // Ignora cliques em botões e links
+    if (target.tagName === "BUTTON" || target.tagName === "A") {
+      return;
+    }
+
+    // Ignora se clicar dentro de um botão ou link
+    if (target.closest("button, a")) {
+      return;
+    }
+
+    // Se chegou aqui, é área vazia - faz o toggle
+    toggleSidebar();
+  };
+
   return (
     <>
       <Sidebar
         className="border-r"
         collapsible="icon"
+        onClick={handleSidebarAreaClick}
         side="left"
         variant="sidebar"
       >
         <SidebarHeader>
           <SidebarMenu>
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-start gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link
-                    className="flex h-8 w-full items-center justify-center gap-3 rounded-md px-2 py-1 hover:bg-muted group-data-[collapsible=icon]:justify-center"
-                    href="/"
-                    onClick={() => {
-                      setOpenMobile(false);
-                    }}
+                  <button
+                    className="flex h-8 w-full cursor-pointer items-center justify-start gap-3 rounded-md border-0 bg-transparent px-2 py-1 outline-none ring-0 hover:bg-muted focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:justify-center"
+                    onClick={handleSidebarClick}
+                    type="button"
                   >
                     <Image
                       alt="Humana AI"
@@ -88,7 +109,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     <span className="group-data-[collapsible=icon]:sr-only">
                       Humana AI
                     </span>
-                  </Link>
+                  </button>
                 </TooltipTrigger>
                 <TooltipContent
                   className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
