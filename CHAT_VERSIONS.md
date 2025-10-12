@@ -18,7 +18,7 @@ Defina qual versão será a padrão do sistema usando a variável de ambiente:
 
 ```env
 # .env.local
-NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v1
+HUMANA_DEFAULT_CHAT_VERSION=v1
 ```
 
 **Valores suportados:** `v1`, `v2`, `v3`, `v4`, `v5`
@@ -27,7 +27,7 @@ NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v1
 
 ### Como Funciona
 
-1. **Sem versão na URL** (`/`): Usa a versão definida em `NEXT_PUBLIC_DEFAULT_CHAT_VERSION`
+1. **Sem versão na URL** (`/`): Usa a versão definida em `HUMANA_DEFAULT_CHAT_VERSION`
 2. **Com versão na URL** (`/v2`, `/v3`, etc.): URL tem prioridade sobre a variável de ambiente
 
 ## 🚀 Casos de Uso
@@ -35,24 +35,24 @@ NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v1
 ### 1. Produção Estável
 ```env
 # Todos os usuários veem V1 por padrão
-NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v1
+HUMANA_DEFAULT_CHAT_VERSION=v1
 ```
 
 ### 2. Testando Nova Versão
 ```env
 # Todos os usuários veem V2 por padrão para testes
-NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v2
+HUMANA_DEFAULT_CHAT_VERSION=v2
 ```
 
 ### 3. Rollback Rápido
 Se V3 tem problemas, simplesmente mude:
 ```env
 # Volta para V2 sem deploy
-NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v2
+HUMANA_DEFAULT_CHAT_VERSION=v2
 ```
 
 ### 4. Testes A/B
-- Grupo A: Acessa `/` (usa `NEXT_PUBLIC_DEFAULT_CHAT_VERSION`)
+- Grupo A: Acessa `/` (usa `HUMANA_DEFAULT_CHAT_VERSION`)
 - Grupo B: Acessa `/v3` (override manual)
 
 ## 🔧 Uso no Desenvolvimento
@@ -62,7 +62,7 @@ NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v2
 1. **Via Environment Variable:**
    ```bash
    # .env.local
-   NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v4
+   HUMANA_DEFAULT_CHAT_VERSION=v4
    
    # Reinicie o servidor
    pnpm dev
@@ -88,7 +88,7 @@ A navegação **mantém a versão correta**:
 
 ```bash
 # No dashboard da Vercel, adicione a variável de ambiente:
-NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v2
+HUMANA_DEFAULT_CHAT_VERSION=v2
 
 # Deploy automático usará V2 como padrão
 ```
@@ -97,7 +97,7 @@ NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v2
 
 ```dockerfile
 # Dockerfile
-ENV NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v3
+ENV HUMANA_DEFAULT_CHAT_VERSION=v3
 ```
 
 ### Kubernetes
@@ -105,14 +105,14 @@ ENV NEXT_PUBLIC_DEFAULT_CHAT_VERSION=v3
 ```yaml
 # deployment.yaml
 env:
-  - name: NEXT_PUBLIC_DEFAULT_CHAT_VERSION
+  - name: HUMANA_DEFAULT_CHAT_VERSION
     value: "v4"
 ```
 
 ## 🛡️ Validação
 
 O sistema valida automaticamente a versão:
-- Se `NEXT_PUBLIC_DEFAULT_CHAT_VERSION` for inválida → usa `v1`
+- Se `HUMANA_DEFAULT_CHAT_VERSION` for inválida → usa `v1`
 - Se a URL tiver versão inválida (`/v99`) → usa a versão padrão
 
 ## 📝 Notas Importantes

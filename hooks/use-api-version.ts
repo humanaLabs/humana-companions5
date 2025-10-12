@@ -21,7 +21,7 @@ export function useApiVersion() {
   }
   
   // If no version in URL, use environment variable
-  // This allows NEXT_PUBLIC_DEFAULT_CHAT_VERSION to control the default
+  // This allows HUMANA_DEFAULT_CHAT_VERSION to control the default
   return CHAT_VERSION;
 }
 

@@ -16,7 +16,7 @@ export const DUMMY_PASSWORD = generateDummyPassword();
 // Supported versions: "v1", "v2", "v3", "v4", "v5"
 // Default is "v1" if not set or invalid
 export const DEFAULT_CHAT_VERSION = (
-  process.env.NEXT_PUBLIC_DEFAULT_CHAT_VERSION || "v1"
+  process.env.HUMANA_DEFAULT_CHAT_VERSION || "v1"
 ).toLowerCase() as "v1" | "v2" | "v3" | "v4" | "v5";
 
 // Validate the version
