@@ -139,9 +139,10 @@ export function Chat({
       });
 
       setHasAppendedQuery(true);
-      window.history.replaceState({}, "", `/chat/${id}`);
+      const versionPrefix = apiVersion === "v1" ? "" : `/${apiVersion}`;
+      window.history.replaceState({}, "", `${versionPrefix}/chat/${id}`);
     }
-  }, [query, sendMessage, hasAppendedQuery, id]);
+  }, [query, sendMessage, hasAppendedQuery, id, apiVersion]);
 
   const { data: votes } = useSWR<Vote[]>(
     messages.length >= 2 ? `/api/${apiVersion}/vote?chatId=${id}` : null,
