@@ -24,9 +24,13 @@ import { fetcher } from "@/lib/utils";
 import { ArtifactActions } from "./artifact-actions";
 import { ArtifactCloseButton } from "./artifact-close-button";
 import { ArtifactMessages } from "./artifact-messages";
-import { MultimodalInput } from "./multimodal-input";
 import { Toolbar } from "./toolbar";
 import { useSidebar } from "./ui/sidebar";
+import { MultimodalInput as MultimodalInputV1 } from "./v1/multimodal-input";
+import { MultimodalInput as MultimodalInputV2 } from "./v2/multimodal-input";
+import { MultimodalInput as MultimodalInputV3 } from "./v3/multimodal-input";
+import { MultimodalInput as MultimodalInputV4 } from "./v4/multimodal-input";
+import { MultimodalInput as MultimodalInputV5 } from "./v5/multimodal-input";
 import { VersionFooter } from "./version-footer";
 import type { VisibilityType } from "./visibility-selector";
 
@@ -88,6 +92,17 @@ function PureArtifact({
 }) {
   const { artifact, setArtifact, metadata, setMetadata } = useArtifact();
   const apiVersion = useApiVersion();
+
+  // Map version to components
+  const multimodalInputMap = {
+    v1: MultimodalInputV1,
+    v2: MultimodalInputV2,
+    v3: MultimodalInputV3,
+    v4: MultimodalInputV4,
+    v5: MultimodalInputV5,
+  };
+
+  const MultimodalInput = multimodalInputMap[apiVersion] || MultimodalInputV1;
 
   const {
     data: documents,

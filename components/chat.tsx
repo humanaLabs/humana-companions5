@@ -17,8 +17,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ChatHeader } from "@/components/v1/chat-header";
-import { Messages } from "@/components/v1/messages";
+import { ChatHeader as ChatHeaderV1 } from "@/components/v1/chat-header";
+import { Messages as MessagesV1 } from "@/components/v1/messages";
+import { MultimodalInput as MultimodalInputV1 } from "@/components/v1/multimodal-input";
+import { ChatHeader as ChatHeaderV2 } from "@/components/v2/chat-header";
+import { Messages as MessagesV2 } from "@/components/v2/messages";
+import { MultimodalInput as MultimodalInputV2 } from "@/components/v2/multimodal-input";
+import { ChatHeader as ChatHeaderV3 } from "@/components/v3/chat-header";
+import { Messages as MessagesV3 } from "@/components/v3/messages";
+import { MultimodalInput as MultimodalInputV3 } from "@/components/v3/multimodal-input";
+import { ChatHeader as ChatHeaderV4 } from "@/components/v4/chat-header";
+import { Messages as MessagesV4 } from "@/components/v4/messages";
+import { MultimodalInput as MultimodalInputV4 } from "@/components/v4/multimodal-input";
+import { ChatHeader as ChatHeaderV5 } from "@/components/v5/chat-header";
+import { Messages as MessagesV5 } from "@/components/v5/messages";
+import { MultimodalInput as MultimodalInputV5 } from "@/components/v5/multimodal-input";
 import { useApiVersion } from "@/hooks/use-api-version";
 import { useArtifactSelector } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
@@ -30,7 +43,6 @@ import type { AppUsage } from "@/lib/usage";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
 import { Artifact } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
-import { MultimodalInput } from "./multimodal-input";
 import { getChatHistoryPaginationKey } from "./sidebar-history";
 import { toast } from "./toast";
 import type { VisibilityType } from "./visibility-selector";
@@ -54,6 +66,38 @@ export function Chat({
 }) {
   const { data: session } = useSession();
   const apiVersion = useApiVersion();
+
+  // Map version to components
+  const componentMap = {
+    v1: {
+      ChatHeader: ChatHeaderV1,
+      Messages: MessagesV1,
+      MultimodalInput: MultimodalInputV1,
+    },
+    v2: {
+      ChatHeader: ChatHeaderV2,
+      Messages: MessagesV2,
+      MultimodalInput: MultimodalInputV2,
+    },
+    v3: {
+      ChatHeader: ChatHeaderV3,
+      Messages: MessagesV3,
+      MultimodalInput: MultimodalInputV3,
+    },
+    v4: {
+      ChatHeader: ChatHeaderV4,
+      Messages: MessagesV4,
+      MultimodalInput: MultimodalInputV4,
+    },
+    v5: {
+      ChatHeader: ChatHeaderV5,
+      Messages: MessagesV5,
+      MultimodalInput: MultimodalInputV5,
+    },
+  };
+
+  const { ChatHeader, Messages, MultimodalInput } =
+    componentMap[apiVersion] || componentMap.v1;
   const { visibilityType } = useChatVisibility({
     chatId: id,
     initialVisibilityType,
@@ -240,7 +284,8 @@ export function Chat({
                   "https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card",
                   "_blank"
                 );
-                const versionPrefix = apiVersion === "v1" ? "" : `/${apiVersion}`;
+                const versionPrefix =
+                  apiVersion === "v1" ? "" : `/${apiVersion}`;
                 window.location.href = `${versionPrefix}/`;
               }}
             >

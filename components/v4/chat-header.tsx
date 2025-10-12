@@ -2,16 +2,16 @@
 
 import type { User } from "next-auth";
 import { memo, startTransition, useEffect, useState } from "react";
-import { saveChatModelAsCookie } from "@/app/(chat)/actions";
-import { SidebarUserNav } from "@/components/sidebar-user-nav";
-import { chatModels } from "@/lib/ai/v4/models";
+import { saveChatModelAsCookie } from "@/app/(chatv4)/actions";
 import {
   PromptInputModelSelect,
   PromptInputModelSelectContent,
   PromptInputModelSelectTrigger,
 } from "@/components/elements/prompt-input";
 import { CpuIcon } from "@/components/icons";
+import { SidebarUserNav } from "@/components/sidebar-user-nav";
 import { SelectItem } from "@/components/ui/select";
+import { chatModels } from "@/lib/ai/v4/models";
 
 function PureChatHeader({
   selectedModelId,

@@ -16,21 +16,22 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
-import { useApiVersion } from "@/hooks/use-api-version";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { cn } from "@/lib/utils";
-import { Context } from "./elements/context";
+import { Context } from "../elements/context";
 import {
   PromptInput,
   PromptInputSubmit,
   PromptInputTextarea,
-} from "./elements/prompt-input";
-import { ArrowUpIcon, PaperclipIcon, StopIcon } from "./icons";
-import { PreviewAttachment } from "./preview-attachment";
-import { SuggestedActions } from "./suggested-actions";
-import { Button } from "./ui/button";
-import type { VisibilityType } from "./visibility-selector";
+} from "../elements/prompt-input";
+import { ArrowUpIcon, PaperclipIcon, StopIcon } from "../icons";
+import { PreviewAttachment } from "../preview-attachment";
+import { SuggestedActions } from "../suggested-actions";
+import { Button } from "../ui/button";
+import type { VisibilityType } from "../visibility-selector";
+
+const API_VERSION = "v4";
 
 function PureMultimodalInput({
   chatId,
@@ -65,7 +66,6 @@ function PureMultimodalInput({
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
-  const apiVersion = useApiVersion();
 
   const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
@@ -116,7 +116,7 @@ function PureMultimodalInput({
   const [uploadQueue, setUploadQueue] = useState<string[]>([]);
 
   const submitForm = useCallback(() => {
-    window.history.replaceState({}, "", `/chat/${chatId}`);
+    window.history.replaceState({}, "", `/v4/chat/${chatId}`);
 
     sendMessage({
       role: "user",
@@ -154,35 +154,32 @@ function PureMultimodalInput({
     resetHeight,
   ]);
 
-  const uploadFile = useCallback(
-    async (file: File) => {
-      const formData = new FormData();
-      formData.append("file", file);
+  const uploadFile = useCallback(async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
 
-      try {
-        const response = await fetch(`/api/${apiVersion}/files/upload`, {
-          method: "POST",
-          body: formData,
-        });
+    try {
+      const response = await fetch(`/api/${API_VERSION}/files/upload`, {
+        method: "POST",
+        body: formData,
+      });
 
-        if (response.ok) {
-          const data = await response.json();
-          const { url, pathname, contentType } = data;
+      if (response.ok) {
+        const data = await response.json();
+        const { url, pathname, contentType } = data;
 
-          return {
-            url,
-            name: pathname,
-            contentType,
-          };
-        }
-        const { error } = await response.json();
-        toast.error(error);
-      } catch (_error) {
-        toast.error("Failed to upload file, please try again!");
+        return {
+          url,
+          name: pathname,
+          contentType,
+        };
       }
-    },
-    [apiVersion]
-  );
+      const { error } = await response.json();
+      toast.error(error);
+    } catch (_error) {
+      toast.error("Failed to upload file, please try again!");
+    }
+  }, []);
 
   const contextProps = useMemo(
     () => ({
