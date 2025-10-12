@@ -11,3 +11,16 @@ export const isTestEnvironment = Boolean(
 export const guestRegex = /^guest-\d+$/;
 
 export const DUMMY_PASSWORD = generateDummyPassword();
+
+// Chat version configuration
+// Supported versions: "v1", "v2", "v3", "v4", "v5"
+// Default is "v1" if not set or invalid
+export const DEFAULT_CHAT_VERSION = (
+  process.env.NEXT_PUBLIC_DEFAULT_CHAT_VERSION || "v1"
+).toLowerCase() as "v1" | "v2" | "v3" | "v4" | "v5";
+
+// Validate the version
+const VALID_VERSIONS = ["v1", "v2", "v3", "v4", "v5"];
+export const CHAT_VERSION = VALID_VERSIONS.includes(DEFAULT_CHAT_VERSION)
+  ? DEFAULT_CHAT_VERSION
+  : "v1";
