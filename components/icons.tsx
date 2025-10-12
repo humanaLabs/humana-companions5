@@ -1211,3 +1211,57 @@ export const WarningIcon = ({ size = 16 }: { size?: number }) => {
     </svg>
   );
 };
+
+export const LayersIcon = ({ size = 16 }: { size?: number }) => {
+  return (
+    <svg
+      height={size}
+      strokeLinejoin="round"
+      style={{ color: "currentcolor" }}
+      viewBox="0 0 16 16"
+      width={size}
+    >
+      <path d="M1.5 3.5H14.5V5.5H1.5V3.5Z" fill="currentColor" />
+      <path d="M1.5 7H14.5V9H1.5V7Z" fill="currentColor" />
+      <path d="M1.5 10.5H14.5V12.5H1.5V10.5Z" fill="currentColor" />
+    </svg>
+  );
+};
+
+export const FolderIcon = ({ size = 16 }: { size?: number }) => {
+  return (
+    <svg
+      height={size}
+      strokeLinejoin="round"
+      style={{ color: "currentcolor" }}
+      viewBox="0 0 16 16"
+      width={size}
+    >
+      <path
+        clipRule="evenodd"
+        d="M1.75 2.5C1.05964 2.5 0.5 3.05964 0.5 3.75V12.25C0.5 12.9404 1.05964 13.5 1.75 13.5H14.25C14.9404 13.5 15.5 12.9404 15.5 12.25V5.25C15.5 4.55964 14.9404 4 14.25 4H7.5L6.25 2.5H1.75Z"
+        fill="currentColor"
+        fillRule="evenodd"
+      />
+    </svg>
+  );
+};
+
+export const BriefcaseIcon = ({ size = 16 }: { size?: number }) => {
+  return (
+    <svg
+      height={size}
+      strokeLinejoin="round"
+      style={{ color: "currentcolor" }}
+      viewBox="0 0 16 16"
+      width={size}
+    >
+      <path
+        clipRule="evenodd"
+        d="M5.5 1.5H10.5V3.5H5.5V1.5ZM4 3.5V1.25C4 0.559644 4.55964 0 5.25 0H10.75C11.4404 0 12 0.559644 12 1.25V3.5H14.25C14.9404 3.5 15.5 4.05964 15.5 4.75V13.25C15.5 13.9404 14.9404 14.5 14.25 14.5H1.75C1.05964 14.5 0.5 13.9404 0.5 13.25V4.75C0.5 4.05964 1.05964 3.5 1.75 3.5H4ZM2 5V7H7V6H9V7H14V5H2ZM14 8.5H9V9.5H7V8.5H2V13H14V8.5Z"
+        fill="currentColor"
+        fillRule="evenodd"
+      />
+    </svg>
+  );
+};

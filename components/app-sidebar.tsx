@@ -4,15 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
-import { HomeIcon, PlusIcon, TrashIcon } from "@/components/icons";
-import {
-  getChatHistoryPaginationKey,
-  SidebarHistory,
-} from "@/components/sidebar-history";
+import { BriefcaseIcon, PencilEditIcon } from "@/components/icons";
+import { SidebarHistory } from "@/components/sidebar-history";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -21,40 +14,11 @@ import {
   SidebarMenu,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "./ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
   const { setOpenMobile, toggleSidebar } = useSidebar();
-  const { mutate } = useSWRConfig();
-  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
-
-  const handleDeleteAll = () => {
-    const deletePromise = fetch("/api/history", {
-      method: "DELETE",
-    });
-
-    toast.promise(deletePromise, {
-      loading: "Deleting all chats...",
-      success: () => {
-        mutate(unstable_serialize(getChatHistoryPaginationKey));
-        router.push("/");
-        setShowDeleteAllDialog(false);
-        return "All chats deleted successfully";
-      },
-      error: "Failed to delete all chats",
-    });
-  };
 
   const handleSidebarClick = () => {
     toggleSidebar();
@@ -79,14 +43,13 @@ export function AppSidebar({ user }: { user: User | undefined }) {
   };
 
   return (
-    <>
-      <Sidebar
-        className="border-r"
-        collapsible="icon"
-        onClick={handleSidebarAreaClick}
-        side="left"
-        variant="sidebar"
-      >
+    <Sidebar
+      className="border-r"
+      collapsible="icon"
+      onClick={handleSidebarAreaClick}
+      side="left"
+      variant="sidebar"
+    >
         <SidebarHeader>
           <SidebarMenu>
             <div className="flex flex-col items-start gap-2">
@@ -131,7 +94,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     type="button"
                     variant="ghost"
                   >
-                    <PlusIcon />
+                    <PencilEditIcon size={16} />
                     <span className="ml-2 group-data-[collapsible=icon]:sr-only">
                       New Chat
                     </span>
@@ -152,44 +115,21 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     type="button"
                     variant="ghost"
                   >
-                    <Link href="/" onClick={() => setOpenMobile(false)}>
-                      <HomeIcon size={16} />
-                      <span className="ml-2 group-data-[collapsible=icon]:sr-only">
-                        Home
-                      </span>
-                    </Link>
+                  <Link href="/" onClick={() => setOpenMobile(false)}>
+                    <BriefcaseIcon size={16} />
+                    <span className="ml-2 group-data-[collapsible=icon]:sr-only">
+                      My Workspaces
+                    </span>
+                  </Link>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent
                   className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
                   side="right"
                 >
-                  Home
+                  My Workspaces
                 </TooltipContent>
               </Tooltip>
-              {user && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
-                      onClick={() => setShowDeleteAllDialog(true)}
-                      type="button"
-                      variant="ghost"
-                    >
-                      <TrashIcon />
-                      <span className="ml-2 group-data-[collapsible=icon]:sr-only">
-                        Delete All
-                      </span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
-                    side="right"
-                  >
-                    Delete All Chats
-                  </TooltipContent>
-                </Tooltip>
-              )}
             </div>
           </SidebarMenu>
         </SidebarHeader>
@@ -197,27 +137,5 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           <SidebarHistory user={user} />
         </SidebarContent>
       </Sidebar>
-
-      <AlertDialog
-        onOpenChange={setShowDeleteAllDialog}
-        open={showDeleteAllDialog}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete all chats?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete all
-              your chats and remove them from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteAll}>
-              Delete All
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
   );
 }
