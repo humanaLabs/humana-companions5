@@ -153,8 +153,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     setShowDeleteDialog(false);
 
     if (deleteId === id) {
-      const versionPrefix = apiVersion === "v1" ? "" : `/${apiVersion}`;
-      router.push(`${versionPrefix}/`);
+      router.push(`/${apiVersion}/`);
     }
   };
 

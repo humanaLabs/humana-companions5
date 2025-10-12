@@ -44,6 +44,8 @@ export const config = {
   matcher: [
     "/",
     "/chat/:id",
+    "/v1",
+    "/v1/chat/:id",
     "/v2",
     "/v2/chat/:id",
     "/v3",

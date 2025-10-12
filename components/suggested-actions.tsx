@@ -39,11 +39,10 @@ function PureSuggestedActions({ chatId, sendMessage }: SuggestedActionsProps) {
           <Suggestion
             className="h-auto w-full whitespace-normal p-3 text-left"
             onClick={(suggestion) => {
-              const versionPrefix = apiVersion === "v1" ? "" : `/${apiVersion}`;
               window.history.replaceState(
                 {},
                 "",
-                `${versionPrefix}/chat/${chatId}`
+                `/${apiVersion}/chat/${chatId}`
               );
               sendMessage({
                 role: "user",

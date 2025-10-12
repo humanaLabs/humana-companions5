@@ -44,13 +44,11 @@ const PureChatItem = ({
     initialVisibilityType: chat.visibility,
   });
 
-  const versionPrefix = apiVersion === "v1" ? "" : `/${apiVersion}`;
-
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive}>
         <Link
-          href={`${versionPrefix}/chat/${chat.id}`}
+          href={`/${apiVersion}/chat/${chat.id}`}
           onClick={() => setOpenMobile(false)}
         >
           <span>{chat.title}</span>

@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
-import { useApiVersion } from "@/hooks/use-api-version";
 import {
   BriefcaseIcon,
   GraduationCapIcon,
@@ -19,6 +18,7 @@ import {
   SidebarMenu,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useApiVersion } from "@/hooks/use-api-version";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
@@ -94,8 +94,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
                   onClick={() => {
                     setOpenMobile(false);
-                    const versionPrefix = apiVersion === "v1" ? "" : `/${apiVersion}`;
-                    router.push(`${versionPrefix}/`);
+                    router.push(`/${apiVersion}`);
                     router.refresh();
                   }}
                   type="button"
@@ -166,7 +165,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           </div>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="group-data-[collapsible=icon]:hidden">
+      <SidebarContent className="!gap-0 !pt-0 group-data-[collapsible=icon]:hidden">
         <SidebarHistory user={user} />
       </SidebarContent>
     </Sidebar>

@@ -183,8 +183,7 @@ export function Chat({
       });
 
       setHasAppendedQuery(true);
-      const versionPrefix = apiVersion === "v1" ? "" : `/${apiVersion}`;
-      window.history.replaceState({}, "", `${versionPrefix}/chat/${id}`);
+      window.history.replaceState({}, "", `/${apiVersion}/chat/${id}`);
     }
   }, [query, sendMessage, hasAppendedQuery, id, apiVersion]);
 
@@ -284,9 +283,7 @@ export function Chat({
                   "https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card",
                   "_blank"
                 );
-                const versionPrefix =
-                  apiVersion === "v1" ? "" : `/${apiVersion}`;
-                window.location.href = `${versionPrefix}/`;
+                window.location.href = `/${apiVersion}/`;
               }}
             >
               Activate

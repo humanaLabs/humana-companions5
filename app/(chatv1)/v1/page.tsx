@@ -3,16 +3,10 @@ import { redirect } from "next/navigation";
 import { Chat } from "@/components/chat";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import { chatModels, DEFAULT_CHAT_MODEL } from "@/lib/ai/v1/models";
-import { CHAT_VERSION } from "@/lib/constants";
 import { generateUUID } from "@/lib/utils";
-import { auth } from "../(auth)/auth";
+import { auth } from "../../(auth)/auth";
 
 export default async function Page() {
-  // Redirect to the configured version if not v1
-  if (CHAT_VERSION !== "v1") {
-    redirect(`/${CHAT_VERSION}`);
-  }
-
   const session = await auth();
 
   if (!session) {
