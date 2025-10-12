@@ -3,6 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
@@ -50,6 +51,7 @@ export function Chat({
   autoResume: boolean;
   initialLastContext?: AppUsage;
 }) {
+  const { data: session } = useSession();
   const { visibilityType } = useChatVisibility({
     chatId: id,
     initialVisibilityType,
@@ -160,6 +162,7 @@ export function Chat({
         <ChatHeader
           onModelChange={setCurrentModelId}
           selectedModelId={currentModelId}
+          user={session?.user}
         />
 
         <Messages

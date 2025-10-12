@@ -1,8 +1,10 @@
 "use client";
 
+import type { User } from "next-auth";
 import { memo, startTransition, useEffect, useState } from "react";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SidebarToggle } from "@/components/sidebar-toggle";
+import { SidebarUserNav } from "@/components/sidebar-user-nav";
 import { chatModels } from "@/lib/ai/models";
 import {
   PromptInputModelSelect,
@@ -15,9 +17,11 @@ import { SelectItem } from "./ui/select";
 function PureChatHeader({
   selectedModelId,
   onModelChange,
+  user,
 }: {
   selectedModelId: string;
   onModelChange?: (modelId: string) => void;
+  user: User | undefined;
 }) {
   const [optimisticModelId, setOptimisticModelId] = useState(selectedModelId);
 
@@ -67,10 +71,15 @@ function PureChatHeader({
           ))}
         </PromptInputModelSelectContent>
       </PromptInputModelSelect>
+
+      <div className="ml-auto">{user && <SidebarUserNav user={user} />}</div>
     </header>
   );
 }
 
 export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
-  return prevProps.selectedModelId === nextProps.selectedModelId;
+  return (
+    prevProps.selectedModelId === nextProps.selectedModelId &&
+    prevProps.user?.email === nextProps.user?.email
+  );
 });
