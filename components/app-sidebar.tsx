@@ -92,10 +92,11 @@ export function AppSidebar({ user }: { user: User | undefined }) {
             <div className="flex flex-col items-start gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button
-                    className="flex h-8 w-full cursor-pointer items-center justify-start gap-3 rounded-md border-0 bg-transparent px-2 py-1 outline-none ring-0 hover:bg-muted focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:justify-center"
+                  <Button
+                    className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
                     onClick={handleSidebarClick}
                     type="button"
+                    variant="ghost"
                   >
                     <Image
                       alt="Humana AI"
@@ -106,10 +107,10 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                       style={{ width: "auto", height: "24px" }}
                       width={24}
                     />
-                    <span className="group-data-[collapsible=icon]:sr-only">
+                    <span className="ml-2 group-data-[collapsible=icon]:sr-only">
                       Humana AI
                     </span>
-                  </button>
+                  </Button>
                 </TooltipTrigger>
                 <TooltipContent
                   className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
@@ -121,7 +122,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center"
+                    className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
                     onClick={() => {
                       setOpenMobile(false);
                       router.push("/");
@@ -147,7 +148,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <TooltipTrigger asChild>
                   <Button
                     asChild
-                    className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center"
+                    className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
                     type="button"
                     variant="ghost"
                   >
@@ -170,7 +171,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center"
+                      className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
                       onClick={() => setShowDeleteAllDialog(true)}
                       type="button"
                       variant="ghost"

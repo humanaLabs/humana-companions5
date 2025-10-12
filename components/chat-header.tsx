@@ -3,7 +3,6 @@
 import type { User } from "next-auth";
 import { memo, startTransition, useEffect, useState } from "react";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
-import { SidebarToggle } from "@/components/sidebar-toggle";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
 import { chatModels } from "@/lib/ai/models";
 import {
@@ -35,8 +34,6 @@ function PureChatHeader({
 
   return (
     <header className="sticky top-0 flex items-center gap-2 bg-background px-2 py-1.5 md:px-2">
-      <SidebarToggle />
-
       <PromptInputModelSelect
         onValueChange={(modelName) => {
           const model = chatModels.find((m) => m.name === modelName);
