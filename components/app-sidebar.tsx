@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
@@ -68,8 +69,16 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   setOpenMobile(false);
                 }}
               >
-                <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-muted">
-                  Chatbot
+                <span className="cursor-pointer rounded-md px-2 py-1 hover:bg-muted">
+                  <Image
+                    alt="Humana AI"
+                    className="dark:invert"
+                    height={24}
+                    priority
+                    src="/images/icone_branco-Humana.png"
+                    style={{ width: "auto", height: "24px" }}
+                    width={24}
+                  />
                 </span>
               </Link>
               <div className="flex flex-row gap-1">
