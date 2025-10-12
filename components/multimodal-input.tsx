@@ -16,7 +16,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
-import { myProvider } from "@/lib/ai/providers";
+import { useApiVersion } from "@/hooks/use-api-version";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { cn } from "@/lib/utils";
@@ -65,6 +65,7 @@ function PureMultimodalInput({
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
+  const apiVersion = useApiVersion();
 
   const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
@@ -153,36 +154,35 @@ function PureMultimodalInput({
     resetHeight,
   ]);
 
-  const uploadFile = useCallback(async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
+  const uploadFile = useCallback(
+    async (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    try {
-      const response = await fetch("/api/files/upload", {
-        method: "POST",
-        body: formData,
-      });
+      try {
+        const response = await fetch(`/api/${apiVersion}/files/upload`, {
+          method: "POST",
+          body: formData,
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        const { url, pathname, contentType } = data;
+        if (response.ok) {
+          const data = await response.json();
+          const { url, pathname, contentType } = data;
 
-        return {
-          url,
-          name: pathname,
-          contentType,
-        };
+          return {
+            url,
+            name: pathname,
+            contentType,
+          };
+        }
+        const { error } = await response.json();
+        toast.error(error);
+      } catch (_error) {
+        toast.error("Failed to upload file, please try again!");
       }
-      const { error } = await response.json();
-      toast.error(error);
-    } catch (_error) {
-      toast.error("Failed to upload file, please try again!");
-    }
-  }, []);
-
-  const _modelResolver = useMemo(() => {
-    return myProvider.languageModel(selectedModelId);
-  }, [selectedModelId]);
+    },
+    [apiVersion]
+  );
 
   const contextProps = useMemo(
     () => ({

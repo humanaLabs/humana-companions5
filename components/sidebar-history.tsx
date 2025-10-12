@@ -23,6 +23,7 @@ import {
   SidebarMenu,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useApiVersion } from "@/hooks/use-api-version";
 import type { Chat } from "@/lib/db/schema";
 import { fetcher } from "@/lib/utils";
 import { LoaderIcon } from "./icons";
@@ -76,30 +77,30 @@ const groupChatsByDate = (chats: Chat[]): GroupedChats => {
   );
 };
 
-export function getChatHistoryPaginationKey(
-  pageIndex: number,
-  previousPageData: ChatHistory
-) {
-  if (previousPageData && previousPageData.hasMore === false) {
-    return null;
-  }
+export function getChatHistoryPaginationKey(version: string) {
+  return (pageIndex: number, previousPageData: ChatHistory) => {
+    if (previousPageData && previousPageData.hasMore === false) {
+      return null;
+    }
 
-  if (pageIndex === 0) {
-    return `/api/history?limit=${PAGE_SIZE}`;
-  }
+    if (pageIndex === 0) {
+      return `/api/${version}/history?limit=${PAGE_SIZE}`;
+    }
 
-  const firstChatFromPage = previousPageData.chats.at(-1);
+    const firstChatFromPage = previousPageData.chats.at(-1);
 
-  if (!firstChatFromPage) {
-    return null;
-  }
+    if (!firstChatFromPage) {
+      return null;
+    }
 
-  return `/api/history?ending_before=${firstChatFromPage.id}&limit=${PAGE_SIZE}`;
+    return `/api/${version}/history?ending_before=${firstChatFromPage.id}&limit=${PAGE_SIZE}`;
+  };
 }
 
 export function SidebarHistory({ user }: { user: User | undefined }) {
   const { setOpenMobile } = useSidebar();
   const { id } = useParams();
+  const apiVersion = useApiVersion();
 
   const {
     data: paginatedChatHistories,
@@ -107,9 +108,13 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     isValidating,
     isLoading,
     mutate,
-  } = useSWRInfinite<ChatHistory>(getChatHistoryPaginationKey, fetcher, {
-    fallbackData: [],
-  });
+  } = useSWRInfinite<ChatHistory>(
+    getChatHistoryPaginationKey(apiVersion),
+    fetcher,
+    {
+      fallbackData: [],
+    }
+  );
 
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -124,7 +129,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     : false;
 
   const handleDelete = () => {
-    const deletePromise = fetch(`/api/chat?id=${deleteId}`, {
+    const deletePromise = fetch(`/api/${apiVersion}/chat?id=${deleteId}`, {
       method: "DELETE",
     });
 

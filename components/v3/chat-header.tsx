@@ -4,14 +4,14 @@ import type { User } from "next-auth";
 import { memo, startTransition, useEffect, useState } from "react";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
-import { chatModels } from "@/lib/ai/models";
+import { chatModels } from "@/lib/ai/v3/models";
 import {
   PromptInputModelSelect,
   PromptInputModelSelectContent,
   PromptInputModelSelectTrigger,
-} from "./elements/prompt-input";
-import { CpuIcon } from "./icons";
-import { SelectItem } from "./ui/select";
+} from "@/components/elements/prompt-input";
+import { CpuIcon } from "@/components/icons";
+import { SelectItem } from "@/components/ui/select";
 
 function PureChatHeader({
   selectedModelId,

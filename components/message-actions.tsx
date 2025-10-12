@@ -3,6 +3,7 @@ import { memo } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { useCopyToClipboard } from "usehooks-ts";
+import { useApiVersion } from "@/hooks/use-api-version";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { Action, Actions } from "./elements/actions";
@@ -23,6 +24,7 @@ export function PureMessageActions({
 }) {
   const { mutate } = useSWRConfig();
   const [_, copyToClipboard] = useCopyToClipboard();
+  const apiVersion = useApiVersion();
 
   if (isLoading) {
     return null;
@@ -76,7 +78,7 @@ export function PureMessageActions({
         data-testid="message-upvote"
         disabled={vote?.isUpvoted}
         onClick={() => {
-          const upvote = fetch("/api/vote", {
+          const upvote = fetch(`/api/${apiVersion}/vote`, {
             method: "PATCH",
             body: JSON.stringify({
               chatId,
@@ -89,7 +91,7 @@ export function PureMessageActions({
             loading: "Upvoting Response...",
             success: () => {
               mutate<Vote[]>(
-                `/api/vote?chatId=${chatId}`,
+                `/api/${apiVersion}/vote?chatId=${chatId}`,
                 (currentVotes) => {
                   if (!currentVotes) {
                     return [];
@@ -125,7 +127,7 @@ export function PureMessageActions({
         data-testid="message-downvote"
         disabled={vote && !vote.isUpvoted}
         onClick={() => {
-          const downvote = fetch("/api/vote", {
+          const downvote = fetch(`/api/${apiVersion}/vote`, {
             method: "PATCH",
             body: JSON.stringify({
               chatId,
@@ -138,7 +140,7 @@ export function PureMessageActions({
             loading: "Downvoting Response...",
             success: () => {
               mutate<Vote[]>(
-                `/api/vote?chatId=${chatId}`,
+                `/api/${apiVersion}/vote?chatId=${chatId}`,
                 (currentVotes) => {
                   if (!currentVotes) {
                     return [];

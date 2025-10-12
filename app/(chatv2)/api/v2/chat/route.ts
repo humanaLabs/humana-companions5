@@ -19,13 +19,13 @@ import { getUsage } from "tokenlens/helpers";
 import { auth, type UserType } from "@/app/(auth)/auth";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
-import type { ChatModel } from "@/lib/ai/models";
-import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
-import { myProvider } from "@/lib/ai/providers";
-import { createDocument } from "@/lib/ai/tools/create-document";
-import { getWeather } from "@/lib/ai/tools/get-weather";
-import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
-import { updateDocument } from "@/lib/ai/tools/update-document";
+import type { ChatModel } from "@/lib/ai/v2/models";
+import { type RequestHints, systemPrompt } from "@/lib/ai/v2/prompts";
+import { myProvider } from "@/lib/ai/v2/providers";
+import { createDocument } from "@/lib/ai/v2/tools/create-document";
+import { getWeather } from "@/lib/ai/v2/tools/get-weather";
+import { requestSuggestions } from "@/lib/ai/v2/tools/request-suggestions";
+import { updateDocument } from "@/lib/ai/v2/tools/update-document";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
@@ -41,7 +41,7 @@ import { ChatSDKError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
-import { generateTitleFromUserMessage } from "../../actions";
+import { generateTitleFromUserMessage } from "../../../actions";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
 export const maxDuration = 60;

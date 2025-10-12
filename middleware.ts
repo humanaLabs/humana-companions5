@@ -44,6 +44,10 @@ export const config = {
   matcher: [
     "/",
     "/chat/:id",
+    "/v2",
+    "/v2/chat/:id",
+    "/v3",
+    "/v3/chat/:id",
     "/workspaces",
     "/learning-hub",
     "/api/:path*",

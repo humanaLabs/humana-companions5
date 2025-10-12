@@ -16,6 +16,7 @@ import { codeArtifact } from "@/artifacts/code/client";
 import { imageArtifact } from "@/artifacts/image/client";
 import { sheetArtifact } from "@/artifacts/sheet/client";
 import { textArtifact } from "@/artifacts/text/client";
+import { useApiVersion } from "@/hooks/use-api-version";
 import { useArtifact } from "@/hooks/use-artifact";
 import type { Document, Vote } from "@/lib/db/schema";
 import type { Attachment, ChatMessage } from "@/lib/types";
@@ -86,6 +87,7 @@ function PureArtifact({
   selectedModelId: string;
 }) {
   const { artifact, setArtifact, metadata, setMetadata } = useArtifact();
+  const apiVersion = useApiVersion();
 
   const {
     data: documents,
@@ -93,7 +95,7 @@ function PureArtifact({
     mutate: mutateDocuments,
   } = useSWR<Document[]>(
     artifact.documentId !== "init" && artifact.status !== "streaming"
-      ? `/api/document?id=${artifact.documentId}`
+      ? `/api/${apiVersion}/document?id=${artifact.documentId}`
       : null,
     fetcher
   );
@@ -133,7 +135,7 @@ function PureArtifact({
       }
 
       mutate<Document[]>(
-        `/api/document?id=${artifact.documentId}`,
+        `/api/${apiVersion}/document?id=${artifact.documentId}`,
         async (currentDocuments) => {
           if (!currentDocuments) {
             return [];
@@ -147,14 +149,17 @@ function PureArtifact({
           }
 
           if (currentDocument.content !== updatedContent) {
-            await fetch(`/api/document?id=${artifact.documentId}`, {
-              method: "POST",
-              body: JSON.stringify({
-                title: artifact.title,
-                content: updatedContent,
-                kind: artifact.kind,
-              }),
-            });
+            await fetch(
+              `/api/${apiVersion}/document?id=${artifact.documentId}`,
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  title: artifact.title,
+                  content: updatedContent,
+                  kind: artifact.kind,
+                }),
+              }
+            );
 
             setIsContentDirty(false);
 
@@ -171,7 +176,7 @@ function PureArtifact({
         { revalidate: false }
       );
     },
-    [artifact, mutate]
+    [artifact, mutate, apiVersion]
   );
 
   const debouncedHandleContentChange = useDebounceCallback(

@@ -7,7 +7,6 @@ import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
-import { ChatHeader } from "@/components/chat-header";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +17,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ChatHeader } from "@/components/v1/chat-header";
+import { Messages } from "@/components/v1/messages";
+import { useApiVersion } from "@/hooks/use-api-version";
 import { useArtifactSelector } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
@@ -28,7 +30,6 @@ import type { AppUsage } from "@/lib/usage";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
 import { Artifact } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
-import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 import { getChatHistoryPaginationKey } from "./sidebar-history";
 import { toast } from "./toast";
@@ -52,6 +53,7 @@ export function Chat({
   initialLastContext?: AppUsage;
 }) {
   const { data: session } = useSession();
+  const apiVersion = useApiVersion();
   const { visibilityType } = useChatVisibility({
     chatId: id,
     initialVisibilityType,
@@ -84,7 +86,7 @@ export function Chat({
     experimental_throttle: 100,
     generateId: generateUUID,
     transport: new DefaultChatTransport({
-      api: "/api/chat",
+      api: `/api/${apiVersion}/chat`,
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest(request) {
         return {
@@ -105,7 +107,7 @@ export function Chat({
       }
     },
     onFinish: () => {
-      mutate(unstable_serialize(getChatHistoryPaginationKey));
+      mutate(unstable_serialize(getChatHistoryPaginationKey(apiVersion)));
     },
     onError: (error) => {
       if (error instanceof ChatSDKError) {
@@ -142,7 +144,7 @@ export function Chat({
   }, [query, sendMessage, hasAppendedQuery, id]);
 
   const { data: votes } = useSWR<Vote[]>(
-    messages.length >= 2 ? `/api/vote?chatId=${id}` : null,
+    messages.length >= 2 ? `/api/${apiVersion}/vote?chatId=${id}` : null,
     fetcher
   );
 
