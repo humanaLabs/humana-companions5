@@ -27,12 +27,15 @@ export function SidebarUserNav({ user }: { user: User }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         {status === "loading" ? (
-          <Button className="size-8 p-0" variant="ghost">
+          <Button
+            className="size-8 border-0 p-0 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent"
+            variant="ghost"
+          >
             <div className="size-6 animate-pulse rounded-full bg-zinc-500/30" />
           </Button>
         ) : (
           <Button
-            className="size-8 p-0"
+            className="size-8 border-0 p-0 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent"
             data-testid="user-nav-button"
             variant="ghost"
           >

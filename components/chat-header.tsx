@@ -1,22 +1,18 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
 import { memo, startTransition, useEffect, useState } from "react";
-import { useWindowSize } from "usehooks-ts";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SidebarToggle } from "@/components/sidebar-toggle";
 import { SidebarUserNav } from "@/components/sidebar-user-nav";
-import { Button } from "@/components/ui/button";
 import { chatModels } from "@/lib/ai/models";
 import {
   PromptInputModelSelect,
   PromptInputModelSelectContent,
   PromptInputModelSelectTrigger,
 } from "./elements/prompt-input";
-import { CpuIcon, PlusIcon } from "./icons";
+import { CpuIcon } from "./icons";
 import { SelectItem } from "./ui/select";
-import { useSidebar } from "./ui/sidebar";
 
 function PureChatHeader({
   selectedModelId,
@@ -27,11 +23,6 @@ function PureChatHeader({
   onModelChange?: (modelId: string) => void;
   user: User | undefined;
 }) {
-  const router = useRouter();
-  const { open } = useSidebar();
-
-  const { width: windowWidth } = useWindowSize();
-
   const [optimisticModelId, setOptimisticModelId] = useState(selectedModelId);
 
   useEffect(() => {
@@ -59,7 +50,7 @@ function PureChatHeader({
         }}
         value={selectedModel?.name}
       >
-        <PromptInputModelSelectTrigger className="flex h-8 w-fit items-center gap-1.5 rounded-lg border border-input bg-background px-2 text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground">
+        <PromptInputModelSelectTrigger className="flex h-8 w-fit items-center gap-1.5 rounded-lg border border-input bg-background px-2 text-foreground shadow-sm outline-none ring-0 transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-accent">
           <CpuIcon size={14} />
           <span className="font-medium text-xs">{selectedModel?.name}</span>
         </PromptInputModelSelectTrigger>
@@ -80,20 +71,6 @@ function PureChatHeader({
           ))}
         </PromptInputModelSelectContent>
       </PromptInputModelSelect>
-
-      {(!open || windowWidth < 768) && (
-        <Button
-          className="h-8 px-2 md:h-fit md:px-2"
-          onClick={() => {
-            router.push("/");
-            router.refresh();
-          }}
-          variant="outline"
-        >
-          <PlusIcon />
-          <span className="md:sr-only">New Chat</span>
-        </Button>
-      )}
 
       <div className="ml-auto">{user && <SidebarUserNav user={user} />}</div>
     </header>

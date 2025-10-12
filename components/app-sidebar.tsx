@@ -58,7 +58,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
 
   return (
     <>
-      <Sidebar className="group-data-[side=left]:border-r-0">
+      <Sidebar className="border-r">
         <SidebarHeader>
           <SidebarMenu>
             <div className="flex flex-row items-center justify-between">
@@ -86,7 +86,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        className="h-8 p-1 md:h-fit md:p-2"
+                        className="h-8 border-0 p-1 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent md:h-fit md:p-2"
                         onClick={() => setShowDeleteAllDialog(true)}
                         type="button"
                         variant="ghost"
@@ -102,7 +102,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className="h-8 p-1 md:h-fit md:p-2"
+                      className="h-8 border-0 p-1 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent md:h-fit md:p-2"
                       onClick={() => {
                         setOpenMobile(false);
                         router.push("/");
