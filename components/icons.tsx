@@ -1250,17 +1250,43 @@ export const FolderIcon = ({ size = 16 }: { size?: number }) => {
 export const BriefcaseIcon = ({ size = 16 }: { size?: number }) => {
   return (
     <svg
+      fill="none"
       height={size}
+      stroke="currentColor"
       strokeLinejoin="round"
+      strokeWidth="1"
       style={{ color: "currentcolor" }}
       viewBox="0 0 16 16"
       width={size}
     >
+      <rect height="10" rx="1" strokeLinecap="round" width="14" x="1" y="4" />
       <path
-        clipRule="evenodd"
-        d="M5.5 1.5H10.5V3.5H5.5V1.5ZM4 3.5V1.25C4 0.559644 4.55964 0 5.25 0H10.75C11.4404 0 12 0.559644 12 1.25V3.5H14.25C14.9404 3.5 15.5 4.05964 15.5 4.75V13.25C15.5 13.9404 14.9404 14.5 14.25 14.5H1.75C1.05964 14.5 0.5 13.9404 0.5 13.25V4.75C0.5 4.05964 1.05964 3.5 1.75 3.5H4ZM2 5V7H7V6H9V7H14V5H2ZM14 8.5H9V9.5H7V8.5H2V13H14V8.5Z"
-        fill="currentColor"
-        fillRule="evenodd"
+        d="M5 4V2.5C5 1.67 5.67 1 6.5 1H9.5C10.33 1 11 1.67 11 2.5V4"
+        strokeLinecap="round"
+      />
+      <path d="M1 8H6M10 8H15" strokeLinecap="round" />
+      <path d="M6 8V9M10 8V9" strokeLinecap="round" />
+    </svg>
+  );
+};
+
+export const GraduationCapIcon = ({ size = 16 }: { size?: number }) => {
+  return (
+    <svg
+      fill="none"
+      height={size}
+      stroke="currentColor"
+      strokeLinejoin="round"
+      strokeWidth="1"
+      style={{ color: "currentcolor" }}
+      viewBox="0 0 16 16"
+      width={size}
+    >
+      <path d="M8 1.5L1 4.5L8 7.5L15 4.5L8 1.5Z" strokeLinecap="round" />
+      <path d="M3 5.5V9.5L8 11.5L13 9.5V5.5" strokeLinecap="round" />
+      <path
+        d="M3.5 10V12C3.5 13 5 14.5 8 14.5C11 14.5 12.5 13 12.5 12V10"
+        strokeLinecap="round"
       />
     </svg>
   );

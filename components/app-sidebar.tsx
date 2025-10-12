@@ -4,7 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
-import { BriefcaseIcon, PencilEditIcon } from "@/components/icons";
+import {
+  BriefcaseIcon,
+  GraduationCapIcon,
+  PencilEditIcon,
+} from "@/components/icons";
 import { SidebarHistory } from "@/components/sidebar-history";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,92 +54,118 @@ export function AppSidebar({ user }: { user: User | undefined }) {
       side="left"
       variant="sidebar"
     >
-        <SidebarHeader>
-          <SidebarMenu>
-            <div className="flex flex-col items-start gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
-                    onClick={handleSidebarClick}
-                    type="button"
-                    variant="ghost"
-                  >
-                    <Image
-                      alt="Humana AI"
-                      className="shrink-0 invert dark:invert-0"
-                      height={24}
-                      priority
-                      src="/images/icone_branco-Humana.png"
-                      style={{ width: "auto", height: "24px" }}
-                      width={24}
-                    />
-                    <span className="ml-2 group-data-[collapsible=icon]:sr-only">
-                      Humana AI
-                    </span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
-                  side="right"
+      <SidebarHeader>
+        <SidebarMenu>
+          <div className="flex flex-col items-start gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
+                  onClick={handleSidebarClick}
+                  type="button"
+                  variant="ghost"
                 >
-                  Humana AI
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
-                    onClick={() => {
-                      setOpenMobile(false);
-                      router.push("/");
-                      router.refresh();
-                    }}
-                    type="button"
-                    variant="ghost"
-                  >
-                    <PencilEditIcon size={16} />
-                    <span className="ml-2 group-data-[collapsible=icon]:sr-only">
-                      New Chat
-                    </span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
-                  side="right"
+                  <Image
+                    alt="Humana AI"
+                    className="shrink-0 invert dark:invert-0"
+                    height={24}
+                    priority
+                    src="/images/icone_branco-Humana.png"
+                    style={{ width: "auto", height: "24px" }}
+                    width={24}
+                  />
+                  <span className="ml-2 group-data-[collapsible=icon]:sr-only">
+                    Humana AI
+                  </span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
+                side="right"
+              >
+                Humana AI
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
+                  onClick={() => {
+                    setOpenMobile(false);
+                    router.push("/");
+                    router.refresh();
+                  }}
+                  type="button"
+                  variant="ghost"
                 >
-                  New Chat
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    asChild
-                    className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
-                    type="button"
-                    variant="ghost"
-                  >
-                  <Link href="/" onClick={() => setOpenMobile(false)}>
+                  <PencilEditIcon size={16} />
+                  <span className="ml-2 group-data-[collapsible=icon]:sr-only">
+                    New Chat
+                  </span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
+                side="right"
+              >
+                New Chat
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  asChild
+                  className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
+                  type="button"
+                  variant="ghost"
+                >
+                  <Link href="/workspaces" onClick={() => setOpenMobile(false)}>
                     <BriefcaseIcon size={16} />
                     <span className="ml-2 group-data-[collapsible=icon]:sr-only">
                       My Workspaces
                     </span>
                   </Link>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
-                  side="right"
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
+                side="right"
+              >
+                My Workspaces
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  asChild
+                  className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
+                  type="button"
+                  variant="ghost"
                 >
-                  My Workspaces
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          </SidebarMenu>
-        </SidebarHeader>
-        <SidebarContent className="group-data-[collapsible=icon]:hidden">
-          <SidebarHistory user={user} />
-        </SidebarContent>
-      </Sidebar>
+                  <Link
+                    href="/learning-hub"
+                    onClick={() => setOpenMobile(false)}
+                  >
+                    <GraduationCapIcon size={16} />
+                    <span className="ml-2 group-data-[collapsible=icon]:sr-only">
+                      Learning Hub
+                    </span>
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
+                side="right"
+              >
+                Learning Hub
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent className="group-data-[collapsible=icon]:hidden">
+        <SidebarHistory user={user} />
+      </SidebarContent>
+    </Sidebar>
   );
 }
