@@ -10,6 +10,7 @@ import {
   useRef,
 } from "react";
 import useSWR from "swr";
+import { useApiVersion } from "@/hooks/use-api-version";
 import { useArtifact } from "@/hooks/use-artifact";
 import type { Document } from "@/lib/db/schema";
 import { cn, fetcher } from "@/lib/utils";
@@ -34,10 +35,11 @@ export function DocumentPreview({
   args,
 }: DocumentPreviewProps) {
   const { artifact, setArtifact } = useArtifact();
+  const apiVersion = useApiVersion();
 
   const { data: documents, isLoading: isDocumentsFetching } = useSWR<
     Document[]
-  >(result ? `/api/document?id=${result.id}` : null, fetcher);
+  >(result ? `/api/${apiVersion}/document?id=${result.id}` : null, fetcher);
 
   const previewDocument = useMemo(() => documents?.[0], [documents]);
   const hitboxRef = useRef<HTMLDivElement>(null);

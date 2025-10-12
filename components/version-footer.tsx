@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useSWRConfig } from "swr";
 import { useWindowSize } from "usehooks-ts";
+import { useApiVersion } from "@/hooks/use-api-version";
 import { useArtifact } from "@/hooks/use-artifact";
 import type { Document } from "@/lib/db/schema";
 import { getDocumentTimestampByIndex } from "@/lib/utils";
@@ -23,6 +24,7 @@ export const VersionFooter = ({
   currentVersionIndex,
 }: VersionFooterProps) => {
   const { artifact } = useArtifact();
+  const apiVersion = useApiVersion();
 
   const { width } = useWindowSize();
   const isMobile = width < 768;
@@ -56,9 +58,9 @@ export const VersionFooter = ({
             setIsMutating(true);
 
             mutate(
-              `/api/document?id=${artifact.documentId}`,
+              `/api/${apiVersion}/document?id=${artifact.documentId}`,
               await fetch(
-                `/api/document?id=${artifact.documentId}&timestamp=${getDocumentTimestampByIndex(
+                `/api/${apiVersion}/document?id=${artifact.documentId}&timestamp=${getDocumentTimestampByIndex(
                   documents,
                   currentVersionIndex
                 )}`,
