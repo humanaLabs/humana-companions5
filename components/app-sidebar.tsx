@@ -72,7 +72,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <span className="cursor-pointer rounded-md px-2 py-1 hover:bg-muted">
                   <Image
                     alt="Humana AI"
-                    className="dark:invert"
+                    className="invert dark:invert-0"
                     height={24}
                     priority
                     src="/images/icone_branco-Humana.png"
