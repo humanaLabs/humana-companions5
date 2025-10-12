@@ -311,7 +311,7 @@ function PureArtifact({
                 {!isCurrentVersion && (
                   <motion.div
                     animate={{ opacity: 1 }}
-                    className="absolute top-0 left-0 z-50 h-dvh w-[400px] bg-zinc-900/50"
+                    className="absolute top-0 left-0 z-50 h-dvh w-[400px] bg-background/50"
                     exit={{ opacity: 0 }}
                     initial={{ opacity: 0 }}
                   />
@@ -334,7 +334,7 @@ function PureArtifact({
                   <MultimodalInput
                     attachments={attachments}
                     chatId={chatId}
-                    className="bg-muted"
+                    className="bg-background"
                     input={input}
                     messages={messages}
                     selectedModelId={selectedModelId}

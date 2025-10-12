@@ -232,7 +232,7 @@
 
 .cm-editor,
 .cm-gutters {
-  @apply bg-background! dark:bg-zinc-800! outline-hidden! selection:bg-zinc-900!;
+  @apply bg-background! outline-hidden! selection:bg-zinc-900!;
 }
 
 .ͼo.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground,
@@ -294,6 +294,28 @@
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+}
+
+/* react-data-grid customization */
+.rdg {
+  @apply bg-background text-foreground;
+}
+
+.rdg-cell {
+  @apply bg-background text-foreground transition-colors;
+}
+
+.rdg-cell:hover {
+  @apply bg-muted;
+}
+
+.rdg-cell-selected,
+.rdg-cell-selected:hover {
+  @apply bg-accent;
+}
+
+.rdg-header-row {
+  @apply bg-background text-foreground;
 }
 
 @theme inline {
