@@ -298,14 +298,14 @@ function PureArtifact({
                   damping: 30,
                 },
               }}
-              className="relative h-dvh w-[400px] shrink-0 bg-muted dark:bg-background"
+              className="relative h-dvh w-[400px] shrink-0 bg-background"
               exit={{
                 opacity: 0,
-                x: 0,
+                x: 400,
                 scale: 1,
-                transition: { duration: 0 },
+                transition: { duration: 0.3 },
               }}
-              initial={{ opacity: 0, x: 10, scale: 1 }}
+              initial={{ opacity: 0, x: 400, scale: 1 }}
             >
               <AnimatePresence>
                 {!isCurrentVersion && (
@@ -334,7 +334,7 @@ function PureArtifact({
                   <MultimodalInput
                     attachments={attachments}
                     chatId={chatId}
-                    className="bg-background dark:bg-muted"
+                    className="bg-muted"
                     input={input}
                     messages={messages}
                     selectedModelId={selectedModelId}
@@ -387,14 +387,15 @@ function PureArtifact({
                     },
                   }
             }
-            className="fixed flex h-dvh flex-col overflow-y-scroll border-zinc-200 bg-background md:border-l dark:border-zinc-700 dark:bg-muted"
+            className="fixed flex h-dvh flex-col overflow-y-scroll border-zinc-200 bg-background md:border-l dark:border-zinc-700"
             exit={{
               opacity: 0,
-              scale: 0.5,
+              x: windowWidth,
+              scale: 1,
               transition: {
-                delay: 0.1,
+                delay: 0,
                 type: "spring",
-                stiffness: 600,
+                stiffness: 300,
                 damping: 30,
               },
             }}
@@ -410,11 +411,11 @@ function PureArtifact({
                   }
                 : {
                     opacity: 1,
-                    x: artifact.boundingBox.left,
-                    y: artifact.boundingBox.top,
-                    height: artifact.boundingBox.height,
-                    width: artifact.boundingBox.width,
-                    borderRadius: 50,
+                    x: windowWidth,
+                    y: 0,
+                    height: windowHeight,
+                    width: windowWidth - 400,
+                    borderRadius: 0,
                   }
             }
           >
@@ -456,7 +457,7 @@ function PureArtifact({
               />
             </div>
 
-            <div className="h-full max-w-full! items-center overflow-y-scroll bg-background dark:bg-muted">
+            <div className="h-full max-w-full! items-center overflow-y-scroll bg-background">
               <artifactDefinition.content
                 content={
                   isCurrentVersion
