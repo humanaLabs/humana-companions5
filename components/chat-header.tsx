@@ -1,10 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import type { User } from "next-auth";
 import { memo, startTransition, useEffect, useState } from "react";
 import { useWindowSize } from "usehooks-ts";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SidebarToggle } from "@/components/sidebar-toggle";
+import { SidebarUserNav } from "@/components/sidebar-user-nav";
 import { Button } from "@/components/ui/button";
 import { chatModels } from "@/lib/ai/models";
 import {
@@ -19,9 +21,11 @@ import { useSidebar } from "./ui/sidebar";
 function PureChatHeader({
   selectedModelId,
   onModelChange,
+  user,
 }: {
   selectedModelId: string;
   onModelChange?: (modelId: string) => void;
+  user: User | undefined;
 }) {
   const router = useRouter();
   const { open } = useSidebar();
@@ -79,7 +83,7 @@ function PureChatHeader({
 
       {(!open || windowWidth < 768) && (
         <Button
-          className="ml-auto h-8 px-2 md:ml-0 md:h-fit md:px-2"
+          className="h-8 px-2 md:h-fit md:px-2"
           onClick={() => {
             router.push("/");
             router.refresh();
@@ -90,10 +94,15 @@ function PureChatHeader({
           <span className="md:sr-only">New Chat</span>
         </Button>
       )}
+
+      <div className="ml-auto">{user && <SidebarUserNav user={user} />}</div>
     </header>
   );
 }
 
 export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
-  return prevProps.selectedModelId === nextProps.selectedModelId;
+  return (
+    prevProps.selectedModelId === nextProps.selectedModelId &&
+    prevProps.user?.email === nextProps.user?.email
+  );
 });
