@@ -11,13 +11,7 @@ import {
 } from "@/components/icons";
 import { SidebarHistory } from "@/components/sidebar-history";
 import { Button } from "@/components/ui/button";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, useSidebar } from "@/components/ui/sidebar";
 import { useApiVersion } from "@/hooks/use-api-version";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
@@ -56,38 +50,58 @@ export function AppSidebar({ user }: { user: User | undefined }) {
       side="left"
       variant="sidebar"
     >
-      <SidebarHeader>
-        <SidebarMenu>
-          <div className="flex flex-col items-start gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="h-8 w-full justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8"
-                  onClick={handleSidebarClick}
-                  type="button"
-                  variant="ghost"
+      <SidebarContent className="!gap-0 !p-0 !overflow-y-auto">
+        <div className="p-2">
+          <div className="flex flex-col items-start gap-2 group-data-[collapsible=icon]:items-center">
+            <div className="flex w-full items-center justify-between group-data-[collapsible=icon]:justify-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="h-8 justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:flex-none"
+                    onClick={handleSidebarClick}
+                    type="button"
+                    variant="ghost"
+                  >
+                    <Image
+                      alt="Humana AI"
+                      className="shrink-0 invert dark:invert-0"
+                      height={24}
+                      priority
+                      src="/images/icone_branco-Humana.png"
+                      style={{ width: "auto", height: "24px" }}
+                      width={24}
+                    />
+                    <span className="ml-2 group-data-[collapsible=icon]:sr-only">
+                      Humana AI
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent
+                  className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
+                  side="right"
                 >
-                  <Image
-                    alt="Humana AI"
-                    className="shrink-0 invert dark:invert-0"
-                    height={24}
-                    priority
-                    src="/images/icone_branco-Humana.png"
-                    style={{ width: "auto", height: "24px" }}
-                    width={24}
-                  />
-                  <span className="ml-2 group-data-[collapsible=icon]:sr-only">
-                    Humana AI
-                  </span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent
-                className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
-                side="right"
+                  Humana AI
+                </TooltipContent>
+              </Tooltip>
+              <Button
+                className="h-8 w-8 border-0 p-0 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:hidden"
+                onClick={toggleSidebar}
+                type="button"
+                variant="ghost"
               >
-                Humana AI
-              </TooltipContent>
-            </Tooltip>
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </Button>
+            </div>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -163,9 +177,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               </TooltipContent>
             </Tooltip>
           </div>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent className="!gap-0 !pt-0 group-data-[collapsible=icon]:hidden">
+        </div>
         <SidebarHistory user={user} />
       </SidebarContent>
     </Sidebar>
