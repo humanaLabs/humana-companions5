@@ -153,7 +153,7 @@ function PureDocumentToolCall({
         </div>
       </div>
 
-      <div className="mt-1 animate-spin">{<LoaderIcon />}</div>
+      <div className="mt-1">{<LoaderIcon />}</div>
     </button>
   );
 }
