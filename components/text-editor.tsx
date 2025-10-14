@@ -4,7 +4,8 @@ import { exampleSetup } from "prosemirror-example-setup";
 import { inputRules } from "prosemirror-inputrules";
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
-import { memo, useEffect, useRef } from "react";
+import { memo, useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 import type { Suggestion } from "@/lib/db/schema";
 import {
@@ -146,7 +147,13 @@ function PureEditor({
   }, [suggestions, content]);
 
   return (
-    <div className="prose dark:prose-invert relative" ref={containerRef} />
+    <div 
+      className={cn(
+        "prose dark:prose-invert relative transition-all duration-300",
+        status === "streaming" && "opacity-90 blur-[2px]"
+      )} 
+      ref={containerRef} 
+    />
   );
 }
 
