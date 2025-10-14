@@ -4,11 +4,21 @@ import { useApiVersion } from "@/hooks/use-api-version";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import type { Chat } from "@/lib/db/schema";
 import {
+  BriefcaseIcon,
   CheckCircleFillIcon,
+  CodeIcon,
+  CpuIcon,
+  FileIcon,
+  FolderIcon,
   GlobeIcon,
+  HomeIcon,
+  ImageIcon,
+  LayersIcon,
   LockIcon,
+  MessageIcon,
   MoreHorizontalIcon,
   ShareIcon,
+  SparklesIcon,
   TrashIcon,
 } from "./icons";
 import {
@@ -27,6 +37,27 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 
+const iconList = [
+  MessageIcon,
+  FileIcon,
+  SparklesIcon,
+  CpuIcon,
+  CodeIcon,
+  BriefcaseIcon,
+  HomeIcon,
+  LayersIcon,
+  FolderIcon,
+  ImageIcon,
+];
+
+const getIconForChat = (chatId: string) => {
+  const hash = chatId
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const index = hash % iconList.length;
+  return iconList[index];
+};
+
 const PureChatItem = ({
   chat,
   isActive,
@@ -44,6 +75,8 @@ const PureChatItem = ({
     initialVisibilityType: chat.visibility,
   });
 
+  const Icon = getIconForChat(chat.id);
+
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive} size="sm">
@@ -51,6 +84,9 @@ const PureChatItem = ({
           href={`/${apiVersion}/chat/${chat.id}`}
           onClick={() => setOpenMobile(false)}
         >
+          <span className="mr-1 opacity-50">
+            <Icon size={11} />
+          </span>
           <span className="text-xs">{chat.title}</span>
         </Link>
       </SidebarMenuButton>
