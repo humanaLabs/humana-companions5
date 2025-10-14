@@ -339,3 +339,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Blur animation for chat messages during streaming */
+@keyframes blur-in-content {
+  0% {
+    filter: blur(8px);
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    filter: blur(0px);
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

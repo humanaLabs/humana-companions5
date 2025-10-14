@@ -6,6 +6,7 @@ import { memo, useState } from "react";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
+import { AnimatedResponse } from "./animated-response";
 import { useDataStream } from "./data-stream-provider";
 import { DocumentToolResult } from "./document";
 import { DocumentPreview } from "./document-preview";
@@ -127,7 +128,9 @@ const PurePreviewMessage = ({
                       })}
                       data-testid="message-content"
                     >
-                      <Response>{sanitizeText(part.text)}</Response>
+                      <AnimatedResponse enableBlurEffect>
+                        {sanitizeText(part.text)}
+                      </AnimatedResponse>
                     </MessageContent>
                   </div>
                 );
