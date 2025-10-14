@@ -20,7 +20,7 @@ export default async function Layout({
         strategy="beforeInteractive"
       />
       <DataStreamProvider>
-        <SidebarProvider collapsible="icon" defaultOpen={false}>
+        <SidebarProvider defaultOpen={false}>
           <AppSidebar user={session?.user} />
           <SidebarInset>{children}</SidebarInset>
         </SidebarProvider>
