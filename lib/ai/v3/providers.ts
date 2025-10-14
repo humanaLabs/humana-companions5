@@ -1,10 +1,15 @@
-import { gateway } from "@ai-sdk/gateway";
+import { createGateway } from "@ai-sdk/gateway";
 import {
   customProvider,
   extractReasoningMiddleware,
   wrapLanguageModel,
 } from "ai";
 import { isTestEnvironment } from "../../constants";
+
+// Configure Gateway with API key if available
+const gateway = createGateway({
+  apiKey: process.env.AI_GATEWAY_API_KEY,
+});
 
 export const myProvider = isTestEnvironment
   ? (() => {
