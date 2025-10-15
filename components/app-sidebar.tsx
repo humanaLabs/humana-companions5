@@ -63,15 +63,17 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     onClick={handleSidebarClick}
                     type="button"
                   >
-                    <Image
-                      alt="Humana AI"
-                      className="shrink-0 invert dark:invert-0"
-                      height={24}
-                      priority
-                      src="/images/icone_branco-Humana.png"
-                      style={{ width: "auto", height: "24px" }}
-                      width={24}
-                    />
+                    <div className="flex w-6 items-center justify-start">
+                      <Image
+                        alt="Humana AI"
+                        className="shrink-0 invert dark:invert-0"
+                        height={24}
+                        priority
+                        src="/images/icone_branco-Humana.png"
+                        style={{ width: "auto", height: "24px" }}
+                        width={24}
+                      />
+                    </div>
                     <span className="ml-2 group-data-[collapsible=icon]:sr-only">
                       Humana AI
                     </span>
@@ -115,7 +117,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   type="button"
                   variant="ghost"
                 >
-                  <PencilEditIcon size={16} />
+                  <div className="flex w-4 items-center justify-start">
+                    <PencilEditIcon size={16} />
+                  </div>
                   <span className="ml-2 group-data-[collapsible=icon]:sr-only">
                     New Chat
                   </span>
@@ -137,7 +141,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   variant="ghost"
                 >
                   <Link href="/workspaces" onClick={() => setOpenMobile(false)}>
-                    <BriefcaseIcon size={16} />
+                    <div className="flex w-4 items-center justify-start">
+                      <BriefcaseIcon size={16} />
+                    </div>
                     <span className="ml-2 group-data-[collapsible=icon]:sr-only">
                       My Workspaces
                     </span>
@@ -163,7 +169,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     href="/learning-hub"
                     onClick={() => setOpenMobile(false)}
                   >
-                    <GraduationCapIcon size={16} />
+                    <div className="flex w-4 items-center justify-start">
+                      <GraduationCapIcon size={16} />
+                    </div>
                     <span className="ml-2 group-data-[collapsible=icon]:sr-only">
                       Learning Hub
                     </span>
