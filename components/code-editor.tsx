@@ -6,6 +6,7 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 import { memo, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 import type { Suggestion } from "@/lib/db/schema";
 
 type EditorProps = {
@@ -92,7 +93,10 @@ function PureCodeEditor({ content, onSaveContent, status }: EditorProps) {
 
   return (
     <div
-      className="not-prose relative w-full pb-[calc(80dvh)] text-sm"
+      className={cn(
+        "not-prose relative w-full pb-[calc(80dvh)] text-sm transition-all duration-300",
+        status === "streaming" && "opacity-90 blur-[2px]"
+      )}
       ref={containerRef}
     />
   );

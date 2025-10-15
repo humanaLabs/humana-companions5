@@ -19,7 +19,7 @@ type SheetEditorProps = {
 const MIN_ROWS = 50;
 const MIN_COLS = 26;
 
-const PureSpreadsheetEditor = ({ content, saveContent }: SheetEditorProps) => {
+const PureSpreadsheetEditor = ({ content, saveContent, status }: SheetEditorProps) => {
   const { resolvedTheme } = useTheme();
 
   const parseData = useMemo(() => {
@@ -107,23 +107,28 @@ const PureSpreadsheetEditor = ({ content, saveContent }: SheetEditorProps) => {
   };
 
   return (
-    <DataGrid
-      className={resolvedTheme === "dark" ? "rdg-dark" : "rdg-light"}
-      columns={columns}
-      defaultColumnOptions={{
-        resizable: true,
-        sortable: true,
-      }}
-      enableVirtualization
-      onCellClick={(args) => {
-        if (args.column.key !== "rowNumber") {
-          args.selectCell(true);
-        }
-      }}
-      onRowsChange={handleRowsChange}
-      rows={localRows}
-      style={{ height: "100%" }}
-    />
+    <div className={cn(
+      "h-full transition-all duration-300",
+      status === "streaming" && "opacity-90 blur-[2px]"
+    )}>
+      <DataGrid
+        className={resolvedTheme === "dark" ? "rdg-dark" : "rdg-light"}
+        columns={columns}
+        defaultColumnOptions={{
+          resizable: true,
+          sortable: true,
+        }}
+        enableVirtualization
+        onCellClick={(args) => {
+          if (args.column.key !== "rowNumber") {
+            args.selectCell(true);
+          }
+        }}
+        onRowsChange={handleRowsChange}
+        rows={localRows}
+        style={{ height: "100%" }}
+      />
+    </div>
   );
 };
 

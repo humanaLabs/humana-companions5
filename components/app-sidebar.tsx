@@ -11,6 +11,7 @@ import {
 } from "@/components/icons";
 import { SidebarHistory } from "@/components/sidebar-history";
 import { Button } from "@/components/ui/button";
+import { ShinyButton } from "@/components/ui/shiny-button";
 import { Sidebar, SidebarContent, useSidebar } from "@/components/ui/sidebar";
 import { useApiVersion } from "@/hooks/use-api-version";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
@@ -56,25 +57,27 @@ export function AppSidebar({ user }: { user: User | undefined }) {
             <div className="flex w-full items-center justify-between group-data-[collapsible=icon]:justify-center">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    className="h-8 justify-start border-0 p-2 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:ring-0 active:bg-transparent group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:flex-none"
+                  <ShinyButton
+                    animationDelay={0.3}
+                    className="h-8 justify-start border-0 px-2 py-0 text-xs group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:flex-none"
                     onClick={handleSidebarClick}
                     type="button"
-                    variant="ghost"
                   >
-                    <Image
-                      alt="Humana AI"
-                      className="shrink-0 invert dark:invert-0"
-                      height={24}
-                      priority
-                      src="/images/icone_branco-Humana.png"
-                      style={{ width: "auto", height: "24px" }}
-                      width={24}
-                    />
+                    <div className="flex w-6 items-center justify-start">
+                      <Image
+                        alt="Humana AI"
+                        className="shrink-0 invert dark:invert-0"
+                        height={24}
+                        priority
+                        src="/images/icone_branco-Humana.png"
+                        style={{ width: "auto", height: "24px" }}
+                        width={24}
+                      />
+                    </div>
                     <span className="ml-2 group-data-[collapsible=icon]:sr-only">
                       Humana AI
                     </span>
-                  </Button>
+                  </ShinyButton>
                 </TooltipTrigger>
                 <TooltipContent
                   className="group-data-[collapsible=icon]:block group-data-[state=expanded]:hidden"
@@ -114,7 +117,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   type="button"
                   variant="ghost"
                 >
-                  <PencilEditIcon size={16} />
+                  <div className="flex w-4 items-center justify-start">
+                    <PencilEditIcon size={16} />
+                  </div>
                   <span className="ml-2 group-data-[collapsible=icon]:sr-only">
                     New Chat
                   </span>
@@ -136,7 +141,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   variant="ghost"
                 >
                   <Link href="/workspaces" onClick={() => setOpenMobile(false)}>
-                    <BriefcaseIcon size={16} />
+                    <div className="flex w-4 items-center justify-start">
+                      <BriefcaseIcon size={16} />
+                    </div>
                     <span className="ml-2 group-data-[collapsible=icon]:sr-only">
                       My Workspaces
                     </span>
@@ -162,7 +169,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     href="/learning-hub"
                     onClick={() => setOpenMobile(false)}
                   >
-                    <GraduationCapIcon size={16} />
+                    <div className="flex w-4 items-center justify-start">
+                      <GraduationCapIcon size={16} />
+                    </div>
                     <span className="ml-2 group-data-[collapsible=icon]:sr-only">
                       Learning Hub
                     </span>

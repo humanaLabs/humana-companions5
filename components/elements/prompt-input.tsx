@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ShineBorder } from "@/components/ui/shine-border";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
@@ -24,11 +25,17 @@ export type PromptInputProps = HTMLAttributes<HTMLFormElement>;
 export const PromptInput = ({ className, ...props }: PromptInputProps) => (
   <form
     className={cn(
-      "w-full overflow-hidden rounded-xl border bg-background shadow-xs",
+      "relative w-full overflow-hidden rounded-xl border bg-background shadow-xs",
       className
     )}
     {...props}
-  />
+  >
+    <ShineBorder
+      borderWidth={1}
+      shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
+    />
+    {props.children}
+  </form>
 );
 
 export type PromptInputTextareaProps = ComponentProps<typeof Textarea> & {
