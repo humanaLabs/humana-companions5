@@ -9,10 +9,15 @@ type AnimatedResponseProps = ComponentProps<typeof Streamdown> & {
 };
 
 export const AnimatedResponse = memo(
-  ({ className, enableBlurEffect = false, children, ...props }: AnimatedResponseProps) => {
+  ({
+    className,
+    enableBlurEffect = false,
+    children,
+    ...props
+  }: AnimatedResponseProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const processedNodesRef = useRef<WeakSet<Node>>(new WeakSet());
-    const [shouldAnimate, setShouldAnimate] = useState(true);
+    const [_shouldAnimate, _setShouldAnimate] = useState(true);
 
     useEffect(() => {
       if (!enableBlurEffect || !containerRef.current) {
@@ -23,18 +28,22 @@ export const AnimatedResponse = memo(
 
       // Apply initial animation to all elements
       const applyInitialAnimation = () => {
-        const allElements = container.querySelectorAll('*');
+        const allElements = container.querySelectorAll("*");
         allElements.forEach((element) => {
-          if (element instanceof HTMLElement && !processedNodesRef.current.has(element)) {
+          if (
+            element instanceof HTMLElement &&
+            !processedNodesRef.current.has(element)
+          ) {
             processedNodesRef.current.add(element);
-            element.style.animation = 'blur-in-content 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards';
-            element.style.opacity = '0';
-            element.style.filter = 'blur(8px)';
-            
+            element.style.animation =
+              "blur-in-content 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards";
+            element.style.opacity = "0";
+            element.style.filter = "blur(8px)";
+
             setTimeout(() => {
-              element.style.animation = '';
-              element.style.opacity = '';
-              element.style.filter = '';
+              element.style.animation = "";
+              element.style.opacity = "";
+              element.style.filter = "";
             }, 500);
           }
         });
@@ -47,31 +56,36 @@ export const AnimatedResponse = memo(
             if (processedNodesRef.current.has(node)) {
               return;
             }
-            
+
             if (node.nodeType === Node.ELEMENT_NODE) {
               const element = node as HTMLElement;
               processedNodesRef.current.add(node);
-              
-              element.style.animation = 'blur-in-content 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards';
-              element.style.opacity = '0';
-              element.style.filter = 'blur(8px)';
-              
+
+              element.style.animation =
+                "blur-in-content 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards";
+              element.style.opacity = "0";
+              element.style.filter = "blur(8px)";
+
               setTimeout(() => {
-                element.style.animation = '';
-                element.style.opacity = '';
-                element.style.filter = '';
+                element.style.animation = "";
+                element.style.opacity = "";
+                element.style.filter = "";
               }, 500);
             }
           });
-          
-          if (mutation.type === 'characterData' && mutation.target.parentElement) {
+
+          if (
+            mutation.type === "characterData" &&
+            mutation.target.parentElement
+          ) {
             const parent = mutation.target.parentElement;
             if (!processedNodesRef.current.has(parent)) {
               processedNodesRef.current.add(parent);
-              parent.style.animation = 'blur-in-content 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards';
-              
+              parent.style.animation =
+                "blur-in-content 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards";
+
               setTimeout(() => {
-                parent.style.animation = '';
+                parent.style.animation = "";
               }, 500);
             }
           }
@@ -95,7 +109,7 @@ export const AnimatedResponse = memo(
         clearTimeout(timeoutId);
         observer.disconnect();
       };
-    }, [enableBlurEffect, shouldAnimate]);
+    }, [enableBlurEffect]);
 
     return (
       <div ref={containerRef}>
@@ -115,4 +129,3 @@ export const AnimatedResponse = memo(
 );
 
 AnimatedResponse.displayName = "AnimatedResponse";
-

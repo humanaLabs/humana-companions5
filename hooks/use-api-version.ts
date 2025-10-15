@@ -19,7 +19,7 @@ export function useApiVersion() {
   if (pathname.startsWith("/v2")) {
     return "v2";
   }
-  
+
   // If no version in URL, use environment variable
   // This allows HUMANA_DEFAULT_CHAT_VERSION to control the default
   return CHAT_VERSION;

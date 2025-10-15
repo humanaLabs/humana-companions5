@@ -60,4 +60,3 @@ export const updateDocument = ({ session, dataStream }: UpdateDocumentProps) =>
       };
     },
   });
-

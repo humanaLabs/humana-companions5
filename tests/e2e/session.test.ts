@@ -21,7 +21,11 @@ test.describe
 
       while (request) {
         chain.unshift(request.url());
-        request = request.redirectedFrom();
+        const redirected = request.redirectedFrom();
+        if (!redirected) {
+          break;
+        }
+        request = redirected;
       }
 
       expect(chain).toEqual([
@@ -63,7 +67,11 @@ test.describe
 
       while (request) {
         chain.unshift(request.url());
-        request = request.redirectedFrom();
+        const redirected = request.redirectedFrom();
+        if (!redirected) {
+          break;
+        }
+        request = redirected;
       }
 
       expect(chain).toEqual(["http://localhost:3000/"]);

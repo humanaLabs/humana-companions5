@@ -19,7 +19,11 @@ type SheetEditorProps = {
 const MIN_ROWS = 50;
 const MIN_COLS = 26;
 
-const PureSpreadsheetEditor = ({ content, saveContent, status }: SheetEditorProps) => {
+const PureSpreadsheetEditor = ({
+  content,
+  saveContent,
+  status,
+}: SheetEditorProps) => {
   const { resolvedTheme } = useTheme();
 
   const parseData = useMemo(() => {
@@ -107,10 +111,12 @@ const PureSpreadsheetEditor = ({ content, saveContent, status }: SheetEditorProp
   };
 
   return (
-    <div className={cn(
-      "h-full transition-all duration-300",
-      status === "streaming" && "opacity-90 blur-[2px]"
-    )}>
+    <div
+      className={cn(
+        "h-full transition-all duration-300",
+        status === "streaming" && "opacity-90 blur-[2px]"
+      )}
+    >
       <DataGrid
         className={resolvedTheme === "dark" ? "rdg-dark" : "rdg-light"}
         columns={columns}

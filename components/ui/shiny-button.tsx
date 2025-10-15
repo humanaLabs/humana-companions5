@@ -1,25 +1,25 @@
 "use client";
 
-import { type MotionProps, motion } from "motion/react";
+import { type HTMLMotionProps, motion } from "framer-motion";
 import React from "react";
 
 import { cn } from "@/lib/utils";
 
-const getAnimationProps = (delay = 0): MotionProps => ({
-  initial: { "--x": "100%", scale: 0.8 },
-  animate: { "--x": "-100%", scale: 1 },
+const getAnimationProps = (delay = 0) => ({
+  initial: { "--x": "100%", scale: 0.8 } as const,
+  animate: { "--x": "-100%", scale: 1 } as const,
   whileTap: { scale: 0.95 },
   transition: {
     repeat: Number.POSITIVE_INFINITY,
-    repeatType: "loop",
+    repeatType: "loop" as const,
     repeatDelay: 1,
     delay,
-    type: "spring",
+    type: "spring" as const,
     stiffness: 20,
     damping: 15,
     mass: 2,
     scale: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 200,
       damping: 5,
       mass: 0.5,
@@ -27,9 +27,7 @@ const getAnimationProps = (delay = 0): MotionProps => ({
   },
 });
 
-interface ShinyButtonProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, keyof MotionProps>,
-    MotionProps {
+interface ShinyButtonProps extends HTMLMotionProps<"button"> {
   children: React.ReactNode;
   className?: string;
   animationDelay?: number;

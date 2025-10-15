@@ -3,13 +3,16 @@ import equal from "fast-deep-equal";
 import { AnimatePresence } from "framer-motion";
 import { ArrowDownIcon } from "lucide-react";
 import { memo, useEffect } from "react";
+import { useDataStream } from "@/components/data-stream-provider";
+import {
+  Conversation,
+  ConversationContent,
+} from "@/components/elements/conversation";
+import { Greeting } from "@/components/greeting";
+import { PreviewMessage, ThinkingMessage } from "@/components/message";
 import { useMessages } from "@/hooks/use-messages";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
-import { useDataStream } from "@/components/data-stream-provider";
-import { Conversation, ConversationContent } from "@/components/elements/conversation";
-import { Greeting } from "@/components/greeting";
-import { PreviewMessage, ThinkingMessage } from "@/components/message";
 
 type MessagesProps = {
   chatId: string;
