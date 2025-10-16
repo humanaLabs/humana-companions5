@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1400" height="900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .org-box {
+        fill: #e3f2fd;
+        stroke: #1976d2;
+        stroke-width: 3;
+        rx: 10;
+      }
+      .workspace-box {
+        fill: #f3e5f5;
+        stroke: #7b1fa2;
+        stroke-width: 3;
+        rx: 10;
+      }
+      .user-box {
+        fill: #e8f5e8;
+        stroke: #388e3c;
+        stroke-width: 3;
+        rx: 10;
+      }
+      .chat-box {
+        fill: #fff3e0;
+        stroke: #f57c00;
+        stroke-width: 3;
+        rx: 10;
+      }
+      .agent-box {
+        fill: #fce4ec;
+        stroke: #c2185b;
+        stroke-width: 3;
+        rx: 10;
+      }
+      .knowledge-box {
+        fill: #e0f2f1;
+        stroke: #00695c;
+        stroke-width: 3;
+        rx: 10;
+      }
+      .permission-box {
+        fill: #fff8e1;
+        stroke: #f9a825;
+        stroke-width: 3;
+        rx: 10;
+      }
+      .junction-box {
+        fill: #ffebee;
+        stroke: #d32f2f;
+        stroke-width: 2;
+        rx: 8;
+      }
+      .title-text {
+        fill: #2c3e50;
+        font-family: 'Arial', sans-serif;
+        font-size: 16px;
+        font-weight: bold;
+        text-anchor: middle;
+      }
+      .subtitle-text {
+        fill: #34495e;
+        font-family: 'Arial', sans-serif;
+        font-size: 12px;
+        text-anchor: middle;
+      }
+      .relationship-line {
+        stroke: #2c3e50;
+        stroke-width: 2;
+        fill: none;
+        marker-end: url(#arrowhead);
+      }
+      .relationship-dotted {
+        stroke: #2c3e50;
+        stroke-width: 2;
+        stroke-dasharray: 8,4;
+        fill: none;
+        marker-end: url(#arrowhead);
+      }
+      .relationship-label {
+        fill: #2c3e50;
+        font-family: 'Arial', sans-serif;
+        font-size: 11px;
+        font-weight: bold;
+        text-anchor: middle;
+      }
+      .flow-arrow {
+        stroke: #e74c3c;
+        stroke-width: 3;
+        fill: none;
+        marker-end: url(#red-arrow);
+      }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2c3e50" />
+    </marker>
+    <marker id="red-arrow" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#e74c3c" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="900" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="700" y="40" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="#2c3e50">
+    🏢 HUMANA COMPANIONS - Arquitetura de Dados
+  </text>
+  <text x="700" y="60" text-anchor="middle" font-family="Arial" font-size="14" fill="#7f8c8d">
+    Sistema de Companions Inteligentes com Controle de Acesso
+  </text>
+
+  <!-- Level 1: Organizations -->
+  <rect x="50" y="100" width="200" height="80" class="org-box"/>
+  <text x="150" y="125" class="title-text">🏢 ORGANIZAÇÕES</text>
+  <text x="150" y="145" class="subtitle-text">Empresas/Instituições</text>
+  <text x="150" y="160" class="subtitle-text">• id, name, created_at</text>
+
+  <!-- Level 2: Workspaces -->
+  <rect x="300" y="100" width="200" height="80" class="workspace-box"/>
+  <text x="400" y="125" class="title-text">💼 WORKSPACES</text>
+  <text x="400" y="145" class="subtitle-text">Ambientes de Trabalho</text>
+  <text x="400" y="160" class="subtitle-text">• id, org_id, name, description</text>
+
+  <!-- Junction Table: WorkspaceUser -->
+  <rect x="550" y="110" width="150" height="60" class="junction-box"/>
+  <text x="625" y="130" class="title-text">🔗</text>
+  <text x="625" y="145" class="subtitle-text">WORKSPACEUSER</text>
+  <text x="625" y="160" class="subtitle-text">• workspace_id, user_id</text>
+
+  <!-- Level 2: Users -->
+  <rect x="750" y="100" width="200" height="80" class="user-box"/>
+  <text x="850" y="125" class="title-text">👥 USUÁRIOS</text>
+  <text x="850" y="145" class="subtitle-text">Pessoas do Sistema</text>
+  <text x="850" y="160" class="subtitle-text">• id, email, name, role</text>
+
+  <!-- Level 3: Chats -->
+  <rect x="1000" y="100" width="200" height="80" class="chat-box"/>
+  <text x="1100" y="125" class="title-text">💬 CHATS</text>
+  <text x="1100" y="145" class="subtitle-text">Conversas</text>
+  <text x="1100" y="160" class="subtitle-text">• id, user_id, workspace_id, title</text>
+
+  <!-- Level 4: Artifacts -->
+  <rect x="1250" y="100" width="120" height="80" class="chat-box"/>
+  <text x="1310" y="125" class="title-text">📄</text>
+  <text x="1310" y="140" class="subtitle-text">ARTIFACTS</text>
+  <text x="1310" y="155" class="subtitle-text">• id, chat_id, type</text>
+
+  <!-- Level 2: Camps (Agents) -->
+  <rect x="50" y="250" width="200" height="80" class="agent-box"/>
+  <text x="150" y="275" class="title-text">🤖 CAMPS</text>
+  <text x="150" y="295" class="subtitle-text">Agentes Principais</text>
+  <text x="150" y="310" class="subtitle-text">• id, org_id, name, description</text>
+
+  <!-- Level 3: Skills -->
+  <rect x="50" y="380" width="200" height="80" class="agent-box"/>
+  <text x="150" y="405" class="title-text">⚡ SKILLS</text>
+  <text x="150" y="425" class="subtitle-text">Sub-agentes/Habilidades</text>
+  <text x="150" y="440" class="subtitle-text">• id, camp_id, name, description</text>
+
+  <!-- Level 4: Process Steps -->
+  <rect x="50" y="510" width="200" height="80" class="agent-box"/>
+  <text x="150" y="535" class="title-text">⚙️ PROCESS_STEPS</text>
+  <text x="150" y="555" class="subtitle-text">Execuções/Passos</text>
+  <text x="150" y="570" class="subtitle-text">• id, skill_id, name, order</text>
+
+  <!-- Knowledge RAG -->
+  <rect x="300" y="250" width="200" height="80" class="knowledge-box"/>
+  <text x="400" y="275" class="title-text">🧠 KNOWLEDGE_RAG</text>
+  <text x="400" y="295" class="subtitle-text">Base de Conhecimento</text>
+  <text x="400" y="310" class="subtitle-text">• id, workspace_id, source, content</text>
+
+  <!-- Tools MCP -->
+  <rect x="300" y="380" width="200" height="80" class="knowledge-box"/>
+  <text x="400" y="405" class="title-text">🔧 TOOLS_MCP</text>
+  <text x="400" y="425" class="subtitle-text">Ferramentas MCP</text>
+  <text x="400" y="440" class="subtitle-text">• id, workspace_id, name, type</text>
+
+  <!-- Permissions ACL -->
+  <rect x="550" y="250" width="200" height="80" class="permission-box"/>
+  <text x="650" y="275" class="title-text">🔐 PERM_ACL</text>
+  <text x="650" y="295" class="subtitle-text">Controle de Acesso</text>
+  <text x="650" y="310" class="subtitle-text">• id, user_id, resource_id, action</text>
+
+  <!-- ENUMS Section -->
+  <rect x="800" y="250" width="200" height="120" fill="#f8f9fa" stroke="#6c757d" stroke-width="2" rx="10"/>
+  <text x="900" y="275" class="title-text">📋 ENUMS</text>
+  <text x="900" y="295" class="subtitle-text">Tipos Enumerados</text>
+  <text x="900" y="315" class="subtitle-text">• ROLES</text>
+  <text x="900" y="330" class="subtitle-text">• RESOURCES</text>
+  <text x="900" y="345" class="subtitle-text">• ACTIONS</text>
+  <text x="900" y="360" class="subtitle-text">• CLASS</text>
+
+  <!-- Relationships - Main Flow -->
+  
+  <!-- ORGS to WORKSPACES -->
+  <line x1="250" y1="140" x2="300" y2="140" class="relationship-line"/>
+  <text x="275" y="135" class="relationship-label">possui</text>
+
+  <!-- WORKSPACES to WORKSPACEUSER -->
+  <line x1="500" y1="140" x2="550" y2="140" class="relationship-line"/>
+  <text x="525" y="135" class="relationship-label">tem</text>
+
+  <!-- WORKSPACEUSER to USERS -->
+  <line x1="700" y1="140" x2="750" y2="140" class="relationship-line"/>
+  <text x="725" y="135" class="relationship-label">pertence</text>
+
+  <!-- USERS to CHATS -->
+  <line x1="950" y1="140" x2="1000" y2="140" class="relationship-line"/>
+  <text x="975" y="135" class="relationship-label">inicia</text>
+
+  <!-- CHATS to ARTIFACTS -->
+  <line x1="1200" y1="140" x2="1250" y2="140" class="relationship-line"/>
+  <text x="1225" y="135" class="relationship-label">gera</text>
+
+  <!-- ORGS to CAMPS -->
+  <line x1="150" y1="180" x2="150" y2="250" class="relationship-line"/>
+  <text x="160" y="215" class="relationship-label">cria</text>
+
+  <!-- CAMPS to SKILLS -->
+  <line x1="150" y1="330" x2="150" y2="380" class="relationship-line"/>
+  <text x="160" y="355" class="relationship-label">contém</text>
+
+  <!-- SKILLS to PROCESS_STEPS -->
+  <line x1="150" y1="460" x2="150" y2="510" class="relationship-line"/>
+  <text x="160" y="485" class="relationship-label">executa</text>
+
+  <!-- WORKSPACES to KNOWLEDGE_RAG -->
+  <line x1="400" y1="180" x2="400" y2="250" class="relationship-line"/>
+  <text x="410" y="215" class="relationship-label">tem</text>
+
+  <!-- WORKSPACES to TOOLS_MCP -->
+  <line x1="400" y1="180" x2="400" y2="380" class="relationship-line"/>
+  <text x="410" y="280" class="relationship-label">usa</text>
+
+  <!-- WORKSPACES to CHATS -->
+  <line x1="400" y1="140" x2="1100" y2="140" class="relationship-dotted"/>
+  <text x="750" y="130" class="relationship-label">contexto</text>
+
+  <!-- USERS to PERM_ACL -->
+  <line x1="850" y1="180" x2="650" y2="250" class="relationship-line"/>
+  <text x="750" y="215" class="relationship-label">tem</text>
+
+  <!-- Context Injection Flow -->
+  <line x1="400" y1="290" x2="150" y2="550" class="flow-arrow"/>
+  <text x="275" y="420" class="relationship-label" fill="#e74c3c">Context Injection</text>
+
+  <line x1="400" y1="420" x2="150" y2="550" class="flow-arrow"/>
+  <text x="275" y="485" class="relationship-label" fill="#e74c3c">Tool Execution</text>
+
+  <!-- Process Flow Labels -->
+  <text x="150" y="610" class="relationship-label" fill="#e74c3c">📊 OBJECT_STEPS_STREAM</text>
+
+  <!-- Legend -->
+  <rect x="50" y="650" width="400" height="200" fill="#f8f9fa" stroke="#2c3e50" stroke-width="2" rx="10"/>
+  <text x="250" y="675" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#2c3e50">📖 Legenda do Sistema</text>
+  
+  <text x="70" y="700" font-family="Arial" font-size="12" fill="#2c3e50">🏢 <strong>Organizações:</strong> Empresas que usam o sistema</text>
+  <text x="70" y="720" font-family="Arial" font-size="12" fill="#2c3e50">💼 <strong>Workspaces:</strong> Ambientes de trabalho dentro das organizações</text>
+  <text x="70" y="740" font-family="Arial" font-size="12" fill="#2c3e50">👥 <strong>Usuários:</strong> Pessoas que interagem com o sistema</text>
+  <text x="70" y="760" font-family="Arial" font-size="12" fill="#2c3e50">🔗 <strong>WorkspaceUser:</strong> Relacionamento usuário-workspace</text>
+  <text x="70" y="780" font-family="Arial" font-size="12" fill="#2c3e50">💬 <strong>Chats:</strong> Conversas entre usuários e companions</text>
+  <text x="70" y="800" font-family="Arial" font-size="12" fill="#2c3e50">🤖 <strong>Camps/Skills:</strong> Agentes e suas habilidades</text>
+  <text x="70" y="820" font-family="Arial" font-size="12" fill="#2c3e50">🧠 <strong>Knowledge/Tools:</strong> Conhecimento e ferramentas do workspace</text>
+  <text x="70" y="840" font-family="Arial" font-size="12" fill="#2c3e50">🔐 <strong>Permissões:</strong> Controle de acesso por usuário</text>
+
+  <!-- Flow Explanation -->
+  <rect x="500" y="650" width="400" height="200" fill="#e8f5e8" stroke="#388e3c" stroke-width="2" rx="10"/>
+  <text x="700" y="675" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="#2c3e50">🔄 Fluxo de Dados</text>
+  
+  <text x="520" y="700" font-family="Arial" font-size="12" fill="#2c3e50">1. <strong>Usuário</strong> inicia chat no workspace</text>
+  <text x="520" y="720" font-family="Arial" font-size="12" fill="#2c3e50">2. <strong>Sistema</strong> verifica permissões (PERM_ACL)</text>
+  <text x="520" y="740" font-family="Arial" font-size="12" fill="#2c3e50">3. <strong>Companion</strong> usa conhecimento (RAG) e ferramentas (MCP)</text>
+  <text x="520" y="760" font-family="Arial" font-size="12" fill="#2c3e50">4. <strong>Skills</strong> executam process_steps específicos</text>
+  <text x="520" y="780" font-family="Arial" font-size="12" fill="#2c3e50">5. <strong>Resultado</strong> gera artifacts na conversa</text>
+  <text x="520" y="800" font-family="Arial" font-size="12" fill="#2c3e50">6. <strong>Context</strong> é injetado para próximas execuções</text>
+
+</svg>

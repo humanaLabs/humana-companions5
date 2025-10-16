@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#F5F5F5"/>
+  
+  <defs>
+    <!-- Sombra suave para as caixas -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Seta preta -->
+    <marker id="arrow-black" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <polygon points="0,0 12,6 0,12" fill="#000000"/>
+    </marker>
+    
+    <!-- Círculo vazio -->
+    <marker id="circle-empty" markerWidth="16" markerHeight="16" refX="8" refY="8">
+      <circle cx="8" cy="8" r="6" fill="#FFFFFF" stroke="#000000" stroke-width="2.5"/>
+    </marker>
+    
+    <style>
+      .box {
+        fill: #1A1A1A;
+        stroke: #000000;
+        stroke-width: 3;
+        filter: url(#shadow);
+      }
+      .box-text {
+        fill: #FFFFFF;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 20px;
+        font-weight: 600;
+        text-anchor: middle;
+        letter-spacing: 0.5px;
+      }
+      .connection {
+        stroke: #000000;
+        stroke-width: 2.5;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .connection-thick {
+        stroke: #000000;
+        stroke-width: 5;
+        fill: none;
+        stroke-linecap: round;
+      }
+      .enum-text {
+        fill: #0066CC;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 20px;
+        font-weight: 500;
+      }
+    </style>
+  </defs>
+  
+  <!-- ==================== LINHA SUPERIOR ==================== -->
+  
+  <!-- ORGS -->
+  <rect x="60" y="60" width="240" height="100" rx="6" class="box"/>
+  <text x="180" y="120" class="box-text">ORGS</text>
+  
+  <!-- WORKSPACES -->
+  <rect x="480" y="60" width="240" height="100" rx="6" class="box"/>
+  <text x="600" y="120" class="box-text">WORKSPACES</text>
+  
+  <!-- USERS -->
+  <rect x="900" y="60" width="240" height="100" rx="6" class="box"/>
+  <text x="1020" y="120" class="box-text">USERS</text>
+  
+  <!-- ==================== COLUNA ESQUERDA ==================== -->
+  
+  <!-- COMPANIONS -->
+  <rect x="60" y="240" width="240" height="100" rx="6" class="box"/>
+  <text x="180" y="300" class="box-text">COMPANIONS</text>
+  
+  <!-- SKILLS -->
+  <rect x="60" y="420" width="240" height="100" rx="6" class="box"/>
+  <text x="180" y="480" class="box-text">SKILLS</text>
+  
+  <!-- STEPS -->
+  <rect x="60" y="600" width="240" height="100" rx="6" class="box"/>
+  <text x="180" y="660" class="box-text">STEPS</text>
+  
+  <!-- ==================== COLUNA CENTRAL ==================== -->
+  
+  <!-- KNOWLEDGE_RAG (grande) -->
+  <rect x="480" y="300" width="240" height="140" rx="6" class="box"/>
+  <text x="600" y="380" class="box-text">KNOWLEDGE_RAG</text>
+  
+  <!-- TOOLS_MCP -->
+  <rect x="480" y="540" width="240" height="100" rx="6" class="box"/>
+  <text x="600" y="600" class="box-text">TOOLS_MCP</text>
+  
+  <!-- ==================== COLUNA DIREITA ==================== -->
+  
+  <!-- CHATS -->
+  <rect x="900" y="240" width="240" height="100" rx="6" class="box"/>
+  <text x="1020" y="300" class="box-text">CHATS</text>
+  
+  <!-- ARTFACTS -->
+  <rect x="900" y="420" width="240" height="100" rx="6" class="box"/>
+  <text x="1020" y="480" class="box-text">ARTFACTS</text>
+  
+  <!-- PERM_ALL -->
+  <rect x="900" y="600" width="240" height="100" rx="6" class="box"/>
+  <text x="1020" y="660" class="box-text">PERM_ALL</text>
+  
+  <!-- ==================== CONEXÕES ==================== -->
+  
+  <!-- ORGS → WORKSPACES -->
+  <path d="M 300 110 L 480 110" class="connection" marker-end="url(#arrow-black)"/>
+  
+  <!-- ORGS → COMPANIONS (com triângulo superior) -->
+  <path d="M 180 160 L 180 240" class="connection" marker-end="url(#arrow-black)"/>
+  <polygon points="180,160 170,180 190,180" fill="#FFFFFF" stroke="#000000" stroke-width="2.5"/>
+  
+  <!-- ORGS → KNOWLEDGE_RAG (diagonal com cotovelo) -->
+  <path d="M 300 160 L 380 220 L 380 350 L 480 350" class="connection" marker-end="url(#arrow-black)"/>
+  
+  <!-- WORKSPACES → USERS -->
+  <path d="M 720 110 L 900 110" class="connection" marker-end="url(#arrow-black)"/>
+  
+  <!-- WORKSPACES → KNOWLEDGE_RAG (vertical) -->
+  <path d="M 600 160 L 600 300" class="connection" marker-end="url(#arrow-black)"/>
+  
+  <!-- WORKSPACES ↔ USERS (linha superior fechada) -->
+  <path d="M 600 60 L 600 30 L 1020 30 L 1020 60" class="connection" marker-end="url(#arrow-black)"/>
+  <polygon points="1020,60 1010,75 1030,75" fill="#FFFFFF" stroke="#000000" stroke-width="2.5"/>
+  
+  <!-- USERS → KNOWLEDGE_RAG (diagonal) -->
+  <path d="M 900 160 L 820 220 L 820 350 L 720 350" class="connection" marker-end="url(#arrow-black)"/>
+  
+  <!-- USERS → CHATS (com círculo) -->
+  <path d="M 1020 160 L 1020 240" class="connection" marker-end="url(#arrow-black)"/>
+  <circle cx="1020" cy="200" r="8" fill="#FFFFFF" stroke="#000000" stroke-width="2.5"/>
+  
+  <!-- COMPANIONS → SKILLS (com triângulo) -->
+  <path d="M 180 340 L 180 420" class="connection" marker-end="url(#arrow-black)"/>
+  <polygon points="180,340 170,360 190,360" fill="#FFFFFF" stroke="#000000" stroke-width="2.5"/>
+  
+  <!-- SKILLS → STEPS (com triângulo) -->
+  <path d="M 180 520 L 180 600" class="connection" marker-end="url(#arrow-black)"/>
+  <polygon points="180,520 170,540 190,540" fill="#FFFFFF" stroke="#000000" stroke-width="2.5"/>
+  
+  <!-- KNOWLEDGE_RAG → TOOLS_MCP (com triângulo) -->
+  <path d="M 600 440 L 600 540" class="connection" marker-end="url(#arrow-black)"/>
+  <polygon points="600,440 590,460 610,460" fill="#FFFFFF" stroke="#000000" stroke-width="2.5"/>
+  
+  <!-- KNOWLEDGE_RAG → ARTFACTS (linha grossa com círculo) -->
+  <path d="M 720 370 L 900 450" class="connection-thick"/>
+  <circle cx="810" cy="410" r="8" fill="#FFFFFF" stroke="#000000" stroke-width="3"/>
+  
+  <!-- CHATS → ARTFACTS (com círculo) -->
+  <path d="M 1020 340 L 1020 420" class="connection" marker-end="url(#arrow-black)"/>
+  <circle cx="1020" cy="380" r="8" fill="#FFFFFF" stroke="#000000" stroke-width="2.5"/>
+  
+  <!-- ==================== TEXTO ENUMS ==================== -->
+  <text x="60" y="750" class="enum-text">
+    ENUMS: ROLES, RESOURCES, ACTIONS, CLASS, RESTRICTS
+  </text>
+  
+  <!-- Borda opcional para impressão -->
+  <rect x="10" y="10" width="1180" height="780" fill="none" stroke="#CCCCCC" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+</svg>

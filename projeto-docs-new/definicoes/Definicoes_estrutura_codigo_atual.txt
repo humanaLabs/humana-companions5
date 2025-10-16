@@ -1,0 +1,263 @@
+====DEFINICOES GERAIS====
+-O projeto usa Next.js 15 com App Router, TypeScript e Server Components por padrão.
+-Toda página/rota deve ser Server Component (async) a menos que precise de interatividade (use 'use client').
+-Use Server Actions para mutações de dados e API Routes apenas para webhooks/integrações externas.
+-Toda chamada ao banco deve passar por lib/db/queries.ts (nunca query direto nos componentes).
+-Componentes client devem ser mínimos e focados, delegando lógica para hooks customizados em /hooks.
+
+====ESTRUTURA DE PASTAS====
+/app                              # Next.js App Router
+  /[locale]                       # Internacionalização (se aplicável)
+  /api                            # API Routes (webhooks, integrações externas)
+  /(authenticated)                # Rotas protegidas (requer autenticação)
+    /chat                         # Sistema de chat
+    /companions                   # Gerenciamento de companions
+    /workspaces                   # Gerenciamento de workspaces
+  /(public)                       # Rotas públicas
+    /login                        # Autenticação
+    /signup                       # Cadastro
+
+/components                       # Componentes React
+  /ui                            # shadcn/ui base components (Button, Card, Input, etc)
+  /v1                            # Componentes versão 1 (sistema legado)
+    /chat                        # Chat v1
+    /shared                      # Componentes reutilizáveis DENTRO de v1
+      animated-header.tsx        # Header com animações
+      chat-header.tsx            # Cabeçalho do chat
+      data-stream-handler.tsx    # Handler para streams de dados
+      messages.tsx               # Renderização de mensagens
+      multimodal-input.tsx       # Input com suporte a múltiplos formatos
+      step-progress.tsx          # Barra de progresso de steps
+      (+ outros 12 componentes)
+  /v5                            # Componentes versão 5 (AI SDK 5.0)
+    /chat                        # Chat v5
+    /skill-engineering           # Engenharia de skills
+    /workers                     # Workers para processamento assíncrono
+    /workflows                   # Workflows
+  /ai-elements-official          # AI SDK Elements oficiais (Conversation, Message, etc)
+  /admin                         # Componentes de administração
+  /agentic-rag                   # RAG agentic
+  /auth                          # Autenticação
+  /chat                          # Chat (componentes base)
+  /debug                         # Ferramentas de debug
+  /experimental                  # Recursos experimentais
+  /flow                          # Fluxos
+  /generative-ui                 # UI generativa
+  /operator-agent                # Agente operador
+  /personal-memory               # Memória pessoal
+  /providers                     # Providers (AI, etc)
+  /subsystems                    # Subsistemas
+  (+ arquivos soltos na raiz: 50+ componentes standalone)
+
+/lib                              # Lógica core e utilitários
+  /db                            # Database (Drizzle ORM)
+    schema.ts                    # Schema completo do banco (tabelas, types)
+    queries.ts                   # Queries reutilizáveis centralizadas
+    migrations/                  # Migrações SQL versionadas
+  /ai                            # Configurações AI SDK
+    providers.ts                 # Providers configurados (myProvider com Azure)
+  /auth                          # NextAuth configuração e helpers
+  /actions                       # Server Actions organizadas por feature
+  utils.ts                       # Utilitários gerais (cn, formatters, validators)
+
+/hooks                            # Custom React Hooks
+  use-chat-*.ts                  # Hooks relacionados a chat
+  use-companion-*.ts             # Hooks de companions
+  use-workspace-*.ts             # Hooks de workspaces
+  use-organization-context.ts    # Hook para context de organização
+
+/types                            # TypeScript Types e Interfaces
+  /v1                            # Types versão 1 (legado)
+  /v5                            # Types versão 5 (AI SDK)
+  index.ts                       # Types globais compartilhados
+
+/contexts                         # React Contexts
+  organization-context.tsx       # Context global de organização e usuário
+
+====NOMENCLATURA DE ARQUIVOS====
+-Componentes: kebab-case.tsx (companion-selector.tsx, chat-message.tsx)
+-Hooks: use-kebab-case.ts (use-chat-state.ts, use-companion-selector.ts)
+-Types: kebab-case.ts (chat-types.ts, companion-types.ts)
+-Utilitários: kebab-case.ts (format-date.ts, validate-input.ts)
+-Server Actions: kebab-case.ts (create-companion.ts, update-workspace.ts)
+-Pastas: kebab-case sempre (companion-selector/, chat-messages/)
+
+====NOMENCLATURA DE CÓDIGO====
+-React Components: PascalCase (CompanionSelector, ChatMessage, UserProfile)
+-Funções e variáveis: camelCase (formatDate, getUserProfile, isAuthenticated)
+-Constantes: UPPER_SNAKE_CASE (MAX_FILE_SIZE, DEFAULT_TIMEOUT, API_VERSION)
+-Types e Interfaces: PascalCase (ChatMessage, UserProfile, CompanionConfig)
+-Enums: PascalCase com valores UPPER (Role.ADMIN, Status.ACTIVE)
+
+====ORGANIZAÇÃO DE COMPONENTES====
+-Server Components: Padrão, sempre async quando busca dados do banco
+-Client Components: Apenas quando necessário interatividade, estado, eventos
+-Marcar Client Components explicitamente com 'use client' no topo do arquivo
+-Lógica complexa de Client Components deve estar em hooks customizados
+-Componentes devem ter máximo 300 linhas (quebrar em subcomponentes se maior)
+
+====COMPONENTES SHARED====
+-Na estrutura REAL do projeto, NÃO existe pasta /components/shared.
+-Existe APENAS /components/v1/shared com componentes reutilizáveis dentro de v1.
+-Componentes em /components/v1/shared são usados exclusivamente pelo sistema v1.
+-Lista completa dos 18 componentes shared de v1:
+  * animated-header.tsx (Header com animações)
+  * artifact-simple.tsx (Artefatos simplificados)
+  * artifact.tsx (Artefatos)
+  * chat-header.tsx (Cabeçalho do chat, ~77KB, arquivo grande)
+  * context-multi-selector.tsx (Seletor de contextos múltiplos)
+  * data-stream-handler.tsx (Handler para streams de dados)
+  * flows-carousel.tsx (Carrossel de fluxos)
+  * icons.tsx (Ícones, ~62KB, arquivo grande)
+  * mcp-multi-selector.tsx (Seletor MCP múltiplo)
+  * message-utils.ts (Utilitários de mensagens)
+  * messages.tsx (Renderização de mensagens)
+  * multimodal-input.tsx (Input multimodal, ~41KB)
+  * preview-attachment.tsx (Preview de anexos)
+  * scroll-to-bottom-button.tsx (Botão scroll to bottom)
+  * step-progress.tsx (Barra de progresso de steps)
+  * universal-message-renderer-simple.tsx (Renderizador universal de mensagens)
+  * visibility-selector.tsx (Seletor de visibilidade)
+  * /ui (subpasta com componentes UI adicionais)
+
+====INTEGRAÇÃO COM BANCO DE DADOS====
+-Todas as queries centralizadas em lib/db/queries.ts
+-Usar Drizzle ORM (nunca SQL raw direto)
+-Sempre com tratamento de erro (try/catch)
+-Queries devem considerar organizationId e userId (context)
+-Server Actions para mutações (create, update, delete)
+-Validação de dados com Zod antes de salvar
+-Revalidação de cache após mutações (revalidatePath)
+
+====AI SDK 5.0 - REGRAS OBRIGATÓRIAS====
+-SEMPRE usar myProvider (lib/ai/providers.ts) configurado com Azure
+-NUNCA criar providers customizados ou usar SDKs cloud-specific
+-SEMPRE usar AI SDK Elements oficiais (Conversation, Message, Response)
+-NUNCA implementar streaming ou tool calling manualmente
+-Usar useChat hook nativo para chat (nunca implementação custom)
+-System prompts via parameter 'system' do AI SDK
+-Conversão de mensagens via convertToModelMessages quando necessário
+
+====SISTEMA DE CONTEXTO====
+-OrganizationContext: Context global com organizationId e userId
+-Provider no root layout (app/layout.tsx)
+-Acesso via hook useOrganizationContext
+-NUNCA passar org/user via props quando context está disponível
+-Context usado para GUC (Global User Context) → RLS no banco
+
+====AUTENTICAÇÃO E AUTORIZAÇÃO====
+-NextAuth v5 configurado em lib/auth/config.ts
+-Session contém: userId, organizationId, role
+-Proteção de rotas via middleware.ts
+-Roles: MasterSys (MS), OrgAdmin (OA), WspManager (WM), User (UR)
+-Controle de acesso: Route Auth (telas) + RLS (dados) + ACL (recursos)
+-Fluxo completo: GUC → RLS → ACL → RAG
+
+====DESIGN SYSTEM - REGRAS OBRIGATÓRIAS====
+-SEMPRE usar classes semânticas: bg-card, text-foreground, text-muted-foreground, border, bg-muted
+-NUNCA usar cores hardcoded: bg-blue-500, text-gray-900, bg-white dark:bg-gray-800
+-Suporte automático a light/dark mode via classes semânticas
+-Componentes shadcn/ui em components/ui/ (Button, Card, Input, Dialog, etc)
+-Radix UI como base dos componentes
+-Framer Motion para animações suaves
+-Lucide React para todos os ícones
+-Ícones ASCII/emojis apenas para menus/sidebar
+-Ícones do framework (Lucide) para telas e cards
+
+====RESPONSIVIDADE====
+-Abordagem Mobile First obrigatória
+-Breakpoints: xs(475px), sm(640px), md(768px), lg(1024px), xl(1280px), 2xl(1536px)
+-Classes responsivas: w-full md:w-1/2 lg:w-1/3
+-Testar em mobile, tablet e desktop
+
+====PERFORMANCE====
+-Server Components por padrão (menos JavaScript no client)
+-Suspense para loading states
+-Dynamic imports para code splitting de componentes pesados
+-Image component do Next.js para otimização automática
+-Lazy loading de componentes não críticos
+-Índices no banco para queries frequentes
+-Cache de dados quando aplicável
+
+====TRATAMENTO DE ERROS====
+-error.tsx em cada rota importante
+-Error boundaries para componentes client críticos
+-Feedback amigável ao usuário (nunca mensagens técnicas)
+-Log de erros para debugging
+-Fallbacks para estados de erro
+
+====TESTES====
+-Testes unitários: vitest
+-Testes E2E: playwright
+-BDD: projeto-bdd/ com features em Gherkin
+-Testes de integração para fluxos críticos
+-Coverage mínimo: 80% para fluxos principais
+
+====BOAS PRÁTICAS GERAIS====
+-Componentes < 300 linhas (quebrar em subcomponentes se maior)
+-Hooks < 150 linhas
+-Services < 200 linhas
+-Features BDD < 100 linhas
+-Um problema = uma solução focada (não múltiplas correções especulativas)
+-Responsabilidade única por módulo/componente
+-Interfaces claras entre módulos
+-Evolução incremental sem quebrar funcionalidades existentes
+
+====TYPESCRIPT====
+-Sempre tipar explicitamente props de componentes
+-Sempre tipar retornos de funções
+-Evitar 'any' (usar 'unknown' quando tipo é desconhecido)
+-Usar tipos do schema.ts via InferSelectModel
+-Strict mode habilitado
+-NoUncheckedIndexedAccess habilitado
+
+====GIT E VERSIONAMENTO====
+-Commits convencionais: feat:, fix:, docs:, refactor:, test:, chore:
+-SEMPRE perguntar antes de git commit/push
+-Branches: main (produção), fixes-* (correções), feature-* (novas features)
+-Pull requests obrigatórios para main
+-Review de código antes de merge
+-NUNCA force push em main/master
+-NUNCA skip hooks (--no-verify)
+
+====SEGURANÇA====
+-NUNCA hardcode: API keys, tokens, senhas, secrets
+-Sempre usar variáveis de ambiente (.env.local)
+-Adicionar .env.local ao .gitignore
+-Validar todos os inputs do usuário com Zod
+-Sanitizar dados antes de renderizar
+-Usar prepared statements (Drizzle faz automaticamente)
+-RLS (Row Level Security) habilitado em todas as tabelas sensíveis
+-ACL (Access Control List) para recursos compartilhados
+
+====DOCUMENTAÇÃO DE CÓDIGO====
+-JSDoc para funções públicas e complexas
+-Comentários para lógica não óbvia
+-README em features importantes
+-CHANGELOG para mudanças significativas
+-Manter documentação atualizada com código
+
+====VENDOR-AGNOSTIC - REGRAS CRÍTICAS====
+-SEMPRE preferir ecossistema Vercel (Next.js, AI SDK, Vercel packages)
+-NUNCA usar SDKs específicos de cloud (AWS SDK, Azure SDK direto, GCP SDK)
+-SEMPRE criar abstrações para funcionalidades cloud-specific
+-Configuration-driven (não hardcoded)
+-Providers configuráveis via environment variables
+
+====CHECKLIST PRÉ-COMMIT====
+-[ ] Server Components onde possível?
+-[ ] Client Components marcados com 'use client'?
+-[ ] Queries centralizadas em queries.ts?
+-[ ] Types explícitos em props e retornos?
+-[ ] Cores semânticas (não hardcoded)?
+-[ ] AI SDK Elements para chat (não custom)?
+-[ ] OrganizationContext usado corretamente?
+-[ ] Validação com Zod para inputs?
+-[ ] Tratamento de erros adequado?
+-[ ] Componente < 300 linhas?
+-[ ] ESLint sem warnings?
+-[ ] TypeScript sem erros (npm run type-check)?
+-[ ] Testado manualmente?
+-[ ] Não hardcodou secrets/keys?
+-[ ] Usa configurações do env.local?
+-[ ] Vendor-agnostic (sem SDKs cloud-specific)?
