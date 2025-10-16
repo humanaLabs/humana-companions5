@@ -12,7 +12,7 @@
 -- FUNÇÃO: Criar Workspace Organizacional para Nova Organização
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION "createDefaultWorkspaceForOrg"()
+CREATE OR REPLACE FUNCTION createDefaultWorkspaceForOrg()
 RETURNS TRIGGER AS $$
 BEGIN
   -- Insere workspace organizacional automaticamente
@@ -41,13 +41,13 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER "trgCreateDefaultWorkspace"
   AFTER INSERT ON "HU_Organization"
   FOR EACH ROW
-  EXECUTE FUNCTION "createDefaultWorkspaceForOrg"();
+  EXECUTE FUNCTION createDefaultWorkspaceForOrg();
 
 -- ============================================================
 -- COMENTÁRIOS
 -- ============================================================
 
-COMMENT ON FUNCTION "createDefaultWorkspaceForOrg"() IS 
+COMMENT ON FUNCTION createDefaultWorkspaceForOrg() IS 
   'Função trigger que cria automaticamente um workspace organizacional quando uma nova organização é inserida';
 
 COMMENT ON TRIGGER "trgCreateDefaultWorkspace" ON "HU_Organization" IS 
@@ -58,7 +58,7 @@ COMMENT ON TRIGGER "trgCreateDefaultWorkspace" ON "HU_Organization" IS
 -- FUNÇÃO: Criar Workspace Pessoal para Novo Usuário
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION "createPersonalWorkspaceForUser"()
+CREATE OR REPLACE FUNCTION createPersonalWorkspaceForUser()
 RETURNS TRIGGER AS $$
 DECLARE
   v_personal_workspace_id UUID;
@@ -91,28 +91,28 @@ $$ LANGUAGE plpgsql;
 -- ============================================================
 
 CREATE TRIGGER "trgCreatePersonalWorkspace"
-  AFTER INSERT ON "User"
+  AFTER INSERT ON "HU_User"
   FOR EACH ROW
-  EXECUTE FUNCTION "createPersonalWorkspaceForUser"();
+  EXECUTE FUNCTION createPersonalWorkspaceForUser();
 
 -- ============================================================
 -- COMENTÁRIOS
 -- ============================================================
 
-COMMENT ON FUNCTION "createPersonalWorkspaceForUser"() IS 
+COMMENT ON FUNCTION createPersonalWorkspaceForUser() IS 
   'Função trigger que cria automaticamente um workspace pessoal quando um novo usuário é inserido';
 
-COMMENT ON TRIGGER "trgCreatePersonalWorkspace" ON "User" IS 
-  'Trigger que executa após INSERT em User para criar workspace pessoal do tipo PERSONAL';
+COMMENT ON TRIGGER "trgCreatePersonalWorkspace" ON "HU_User" IS 
+  'Trigger que executa após INSERT em HU_User para criar workspace pessoal do tipo PERSONAL';
 
 -- ============================================================================
 -- FIM DOS TRIGGERS
 -- ============================================================================
 
 -- RESUMO FINAL:
--- ✅ Funções camelCase: "createDefaultWorkspaceForOrg"(), "createPersonalWorkspaceForUser"()
+-- ✅ Funções camelCase: createDefaultWorkspaceForOrg(), createPersonalWorkspaceForUser()
 -- ✅ Triggers camelCase: "trgCreateDefaultWorkspace", "trgCreatePersonalWorkspace"
--- ✅ Tabelas atualizadas: "HU_Organization", "User", "HU_Workspace"
+-- ✅ Tabelas atualizadas: "HU_Organization", "HU_User", "HU_Workspace"
 -- ✅ Colunas camelCase: NEW.id, NEW."name", NEW."orgId", NEW.email
 -- ✅ ENUM: "workspaceTypeEnum" (ORGANIZATIONAL, PERSONAL)
 -- ✅ Aspas duplas obrigatórias para preservar camelCase no PostgreSQL

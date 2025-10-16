@@ -1,14 +1,15 @@
 -- ============================================================
--- PERMISSIONS_ACL - TRIGGERS ADICIONAIS RECOMENDADOS
+-- PERMISSIONS_ACL - TRIGGERS ADICIONAIS RECOMENDADOS v3.0
 -- ============================================================
--- Versão: 2.0
--- Data: 2025-01-10
+-- Versão: 3.0
+-- Data: 2025-01-15
 -- Descrição: Triggers complementares para segurança e integridade
 -- Status: RECOMENDADO (não obrigatório)
+-- Mudanças v3.0: Nomenclatura camelCase com aspas duplas
 -- ============================================================
 
 -- ⚠️ NOTA: O arquivo schema-permissions-acl-v2.sql já possui:
---    ✅ trg_permissions_revocation (validação de revogação)
+--    ✅ Triggers básicos de validação
 --
 -- Este arquivo adiciona 3 triggers complementares para:
 --    1. Prevenir modificação de permissões revogadas
@@ -20,7 +21,7 @@
 -- ============================================================
 
 -- ============================================================
--- TRIGGER 2: Prevenir Modificação de Permissão Revogada
+-- TRIGGER 1: Prevenir Modificação de Permissão Revogada
 -- ============================================================
 -- Propósito: SEGURANÇA - Permissão revogada é IMUTÁVEL
 -- Importância: CRÍTICA
@@ -28,12 +29,12 @@
 --         ou modificada, garantindo integridade da auditoria
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION prevent_revoked_permission_update()
+CREATE OR REPLACE FUNCTION preventRevokedPermissionUpdate()
 RETURNS TRIGGER AS $$
 BEGIN
   -- Se permissão já foi revogada, NÃO permitir alterações
-  IF OLD.perm_revoked_at IS NOT NULL THEN
-    RAISE EXCEPTION 'Permissão revogada não pode ser modificada (perm_id: %)', OLD.perm_id
+  IF OLD."revokedAt" IS NOT NULL THEN
+    RAISE EXCEPTION 'Permissão revogada não pode ser modificada (id: %)', OLD.id
       USING HINT = 'Crie uma nova permissão ao invés de modificar uma revogada',
             ERRCODE = 'integrity_constraint_violation';
   END IF;
@@ -42,17 +43,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_prevent_revoked_update
-  BEFORE UPDATE ON permissions_acl
+CREATE TRIGGER "trgPreventRevokedUpdate"
+  BEFORE UPDATE ON "HU_Permission_ACL"
   FOR EACH ROW
-  WHEN (OLD.perm_revoked_at IS NOT NULL)
-  EXECUTE FUNCTION prevent_revoked_permission_update();
+  WHEN (OLD."revokedAt" IS NOT NULL)
+  EXECUTE FUNCTION preventRevokedPermissionUpdate();
 
-COMMENT ON FUNCTION prevent_revoked_permission_update() IS 
+COMMENT ON FUNCTION preventRevokedPermissionUpdate() IS 
   'Impede modificação de permissões revogadas (segurança e auditoria)';
 
 -- ============================================================
--- TRIGGER 3: Validação Temporal Consistente
+-- TRIGGER 2: Validação Temporal Consistente
 -- ============================================================
 -- Propósito: INTEGRIDADE - Garantir datas lógicas e válidas
 -- Importância: ALTA
@@ -61,21 +62,21 @@ COMMENT ON FUNCTION prevent_revoked_permission_update() IS
 --         antes de ser criada)
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION validate_perm_temporal_consistency()
+CREATE OR REPLACE FUNCTION validatePermTemporalConsistency()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- Validar que perm_valid_to seja maior que perm_created_at
-  IF NEW.perm_valid_to IS NOT NULL AND NEW.perm_valid_to <= NEW.perm_created_at THEN
-    RAISE EXCEPTION 'perm_valid_to (%) deve ser maior que perm_created_at (%)', 
-      NEW.perm_valid_to, NEW.perm_created_at
+  -- Validar que validTo seja maior que createdAt
+  IF NEW."validTo" IS NOT NULL AND NEW."validTo" <= NEW."createdAt" THEN
+    RAISE EXCEPTION 'validTo (%) deve ser maior que createdAt (%)', 
+      NEW."validTo", NEW."createdAt"
       USING HINT = 'A data de expiração deve ser posterior à data de criação',
             ERRCODE = 'check_violation';
   END IF;
   
-  -- Validar que perm_revoked_at seja maior ou igual a perm_created_at
-  IF NEW.perm_revoked_at IS NOT NULL AND NEW.perm_revoked_at < NEW.perm_created_at THEN
-    RAISE EXCEPTION 'perm_revoked_at (%) não pode ser anterior a perm_created_at (%)', 
-      NEW.perm_revoked_at, NEW.perm_created_at
+  -- Validar que revokedAt seja maior ou igual a createdAt
+  IF NEW."revokedAt" IS NOT NULL AND NEW."revokedAt" < NEW."createdAt" THEN
+    RAISE EXCEPTION 'revokedAt (%) não pode ser anterior a createdAt (%)', 
+      NEW."revokedAt", NEW."createdAt"
       USING HINT = 'Não é possível revogar uma permissão antes dela ser criada',
             ERRCODE = 'check_violation';
   END IF;
@@ -84,16 +85,16 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_perm_temporal_consistency
-  BEFORE INSERT OR UPDATE ON permissions_acl
+CREATE TRIGGER "trgPermTemporalConsistency"
+  BEFORE INSERT OR UPDATE ON "HU_Permission_ACL"
   FOR EACH ROW
-  EXECUTE FUNCTION validate_perm_temporal_consistency();
+  EXECUTE FUNCTION validatePermTemporalConsistency();
 
-COMMENT ON FUNCTION validate_perm_temporal_consistency() IS 
-  'Valida consistência temporal das datas de permissão (perm_valid_to e perm_revoked_at)';
+COMMENT ON FUNCTION validatePermTemporalConsistency() IS 
+  'Valida consistência temporal das datas de permissão (validTo e revokedAt)';
 
 -- ============================================================
--- TRIGGER 4: Auditoria de Mudanças Críticas (OPCIONAL)
+-- TRIGGER 3: Auditoria de Mudanças Críticas (OPCIONAL)
 -- ============================================================
 -- Propósito: COMPLIANCE - Log automático para auditoria
 -- Importância: MÉDIA (pode ser substituído por aplicação)
@@ -101,41 +102,28 @@ COMMENT ON FUNCTION validate_perm_temporal_consistency() IS
 --         Útil para compliance (LGPD, GDPR, SOX)
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION audit_permission_changes()
+CREATE OR REPLACE FUNCTION auditPermissionChanges()
 RETURNS TRIGGER AS $$
 BEGIN
   -- Log para INSERT (nova permissão concedida)
   IF TG_OP = 'INSERT' THEN
-    RAISE NOTICE 'AUDIT: Permissão concedida - perm_id: %, entity: %(%), action: %, user: %, org: %',
-      NEW.perm_id, NEW.perm_entity_code, NEW.perm_entity_pk_id, 
-      NEW.perm_action, NEW.perm_created_for_user_id, NEW.orgs_id;
+    RAISE NOTICE 'AUDIT: Permissão concedida - id: %, entity: %(%), action: %, user: %, org: %',
+      NEW.id, NEW."entityCode", NEW."entityId", 
+      NEW."action", NEW."createdForUserId", NEW."orgId";
   END IF;
   
-  -- Log para UPDATE (mudança em permissão)
-  IF TG_OP = 'UPDATE' THEN
-    -- Se foi revogada
-    IF OLD.perm_revoked_at IS NULL AND NEW.perm_revoked_at IS NOT NULL THEN
-      RAISE WARNING 'AUDIT: Permissão REVOGADA - perm_id: %, user: %, org: %',
-        NEW.perm_id, NEW.perm_created_for_user_id, NEW.orgs_id;
-    END IF;
-    
-    -- Se ação foi alterada
-    IF OLD.perm_action != NEW.perm_action THEN
-      RAISE WARNING 'AUDIT: Ação alterada - perm_id: %, de % para %, user: %',
-        NEW.perm_id, OLD.perm_action, NEW.perm_action, NEW.perm_created_for_user_id;
-    END IF;
-    
-    -- Se validade foi alterada
-    IF OLD.perm_valid_to IS DISTINCT FROM NEW.perm_valid_to THEN
-      RAISE NOTICE 'AUDIT: Validade alterada - perm_id: %, de % para %',
-        NEW.perm_id, OLD.perm_valid_to, NEW.perm_valid_to;
-    END IF;
+  -- Log para UPDATE (revogação de permissão)
+  IF TG_OP = 'UPDATE' AND OLD."revokedAt" IS NULL AND NEW."revokedAt" IS NOT NULL THEN
+    RAISE NOTICE 'AUDIT: Permissão revogada - id: %, entity: %(%), action: %, user: %, org: %',
+      NEW.id, NEW."entityCode", NEW."entityId", 
+      NEW."action", NEW."createdForUserId", NEW."orgId";
   END IF;
   
-  -- Log para DELETE (permissão removida - ATENÇÃO!)
+  -- Log para DELETE (remoção física)
   IF TG_OP = 'DELETE' THEN
-    RAISE WARNING 'AUDIT: Permissão DELETADA (hard delete) - perm_id: %, user: %, org: %',
-      OLD.perm_id, OLD.perm_created_for_user_id, OLD.orgs_id;
+    RAISE NOTICE 'AUDIT: Permissão deletada (FÍSICO) - id: %, entity: %(%), action: %, user: %, org: %',
+      OLD.id, OLD."entityCode", OLD."entityId", 
+      OLD."action", OLD."createdForUserId", OLD."orgId";
     RETURN OLD;
   END IF;
   
@@ -143,77 +131,25 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_audit_permission_changes
-  AFTER INSERT OR UPDATE OR DELETE ON permissions_acl
+CREATE TRIGGER "trgAuditPermChanges"
+  AFTER INSERT OR UPDATE OR DELETE ON "HU_Permission_ACL"
   FOR EACH ROW
-  EXECUTE FUNCTION audit_permission_changes();
+  EXECUTE FUNCTION auditPermissionChanges();
 
-COMMENT ON FUNCTION audit_permission_changes() IS 
-  'Log automático de mudanças em permissões para auditoria e compliance';
+COMMENT ON FUNCTION auditPermissionChanges() IS 
+  'Gera logs de auditoria para mudanças críticas em permissões (INSERT, UPDATE de revogação, DELETE)';
 
--- ============================================================
--- VALIDAÇÃO PÓS-INSTALAÇÃO
--- ============================================================
+-- ============================================================================
+-- FIM DOS TRIGGERS ADICIONAIS
+-- ============================================================================
 
--- Verificar triggers criados
-SELECT 
-  trigger_name,
-  event_manipulation,
-  action_timing,
-  action_statement
-FROM information_schema.triggers
-WHERE event_object_table = 'permissions_acl'
-ORDER BY trigger_name;
+-- RESUMO FINAL:
+-- ✅ 3 Triggers Adicionais para "HU_Permission_ACL"
+-- ✅ Funções camelCase: preventRevokedPermissionUpdate, validatePermTemporalConsistency, auditPermissionChanges
+-- ✅ Triggers camelCase: "trgPreventRevokedUpdate", "trgPermTemporalConsistency", "trgAuditPermChanges"
+-- ✅ Colunas camelCase: "revokedAt", "createdAt", "validTo", "entityCode", "entityId", "action", "createdForUserId", "orgId"
+-- ✅ Tabela: "HU_Permission_ACL"
+-- ✅ Aspas duplas obrigatórias para preservar camelCase no PostgreSQL
 
--- ============================================================
--- TESTES RECOMENDADOS
--- ============================================================
-
--- Teste 1: Prevenir modificação de permissão revogada
--- Deve falhar com erro
-/*
-INSERT INTO permissions_acl (orgs_id, perm_entity_code, perm_entity_pk_id, perm_action, 
-  perm_created_by_user_id, perm_created_for_user_id, perm_revoked_at)
-VALUES ('...', 'ORG', '...', 'REA', '...', '...', NOW());
-
-UPDATE permissions_acl SET perm_action = 'WRI' WHERE perm_id = '...';
--- ❌ Deve retornar: ERROR - Permissão revogada não pode ser modificada
-*/
-
--- Teste 2: Validação temporal
--- Deve falhar com erro
-/*
-INSERT INTO permissions_acl (orgs_id, perm_entity_code, perm_entity_pk_id, perm_action, 
-  perm_created_by_user_id, perm_created_for_user_id, perm_created_at, perm_valid_to)
-VALUES ('...', 'ORG', '...', 'REA', '...', '...', NOW(), NOW() - INTERVAL '1 day');
--- ❌ Deve retornar: ERROR - perm_valid_to deve ser maior que perm_created_at
-*/
-
--- Teste 3: Auditoria automática
--- Deve gerar NOTICE/WARNING no log
-/*
-INSERT INTO permissions_acl (orgs_id, perm_entity_code, perm_entity_pk_id, perm_action, 
-  perm_created_by_user_id, perm_created_for_user_id)
-VALUES ('...', 'ORG', '...', 'REA', '...', '...');
--- ✅ Deve gerar: NOTICE - AUDIT: Permissão concedida...
-*/
-
--- ============================================================
--- DESINSTALAÇÃO (se necessário)
--- ============================================================
-
-/*
--- Para remover os triggers adicionais:
-DROP TRIGGER IF EXISTS trg_prevent_revoked_update ON permissions_acl;
-DROP TRIGGER IF EXISTS trg_perm_temporal_consistency ON permissions_acl;
-DROP TRIGGER IF EXISTS trg_audit_permission_changes ON permissions_acl;
-
-DROP FUNCTION IF EXISTS prevent_revoked_permission_update();
-DROP FUNCTION IF EXISTS validate_perm_temporal_consistency();
-DROP FUNCTION IF EXISTS audit_permission_changes();
-*/
-
--- ============================================================
--- FIM DO SCRIPT
--- ============================================================
-
+-- DOCUMENTAÇÃO:
+-- Para mais informações, consulte: projeto-docs-new/tabelas/ANALISE-TABELA-PERMISSIONS-ACL.md

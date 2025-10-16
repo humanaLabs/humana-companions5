@@ -12,9 +12,9 @@
 -- 1. TIPO ENUM - RBAC (4 NÍVEIS)
 -- ============================================================================
 
-CREATE TYPE "userRole" AS ENUM ('MS', 'OA', 'WM', 'UR');
+CREATE TYPE "userRoleEnum" AS ENUM ('MS', 'OA', 'WM', 'UR');
 
-COMMENT ON TYPE "userRole" IS 'RBAC com 4 níveis: MS (MasterSys), OA (OrgAdmin), WM (WorkspaceManager), UR (User)';
+COMMENT ON TYPE "userRoleEnum" IS 'RBAC com 4 níveis: MS (MasterSys), OA (OrgAdmin), WM (WorkspaceManager), UR (User)';
 
 -- MS = MasterSys (super admin global) - 1% dos usuários
 -- OA = OrgAdmin (admin da organização) - 5% dos usuários
@@ -25,7 +25,7 @@ COMMENT ON TYPE "userRole" IS 'RBAC com 4 níveis: MS (MasterSys), OA (OrgAdmin)
 -- 2. TABELA PRINCIPAL - User (camelCase)
 -- ============================================================================
 
-CREATE TABLE "User" (
+CREATE TABLE "HU_User" (
   -- ====================================
   -- HEADER (9 campos - Alta Frequência)
   -- ====================================
@@ -55,7 +55,7 @@ CREATE TABLE "User" (
   -- Usado em: 90% das queries (isolamento por org)
   -- Índice: idxUserOrgId (composto)
   
-  "roleCode" "userRole" NOT NULL DEFAULT 'UR',
+  "role" "userRoleEnum" NOT NULL DEFAULT 'UR',
   -- RBAC (4 níveis: MS, OA, WM, UR)
   -- Usado em: 80% das queries (permissões)
   -- Índice: idxUserRole (parcial)
@@ -83,7 +83,7 @@ CREATE TABLE "User" (
   
   
   -- Constraints
-  CONSTRAINT valid_role CHECK ("roleCode" IN ('MS', 'OA', 'WM', 'UR')),
+  CONSTRAINT valid_role CHECK ("role" IN ('MS', 'OA', 'WM', 'UR')),
   CONSTRAINT valid_email CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
   CONSTRAINT valid_attributes CHECK (jsonb_typeof("attributes") = 'object')
 );
@@ -92,18 +92,18 @@ CREATE TABLE "User" (
 -- 3. COMENTÁRIOS DA TABELA
 -- ============================================================================
 
-COMMENT ON TABLE "User" IS 'Tabela de usuários v3.0 - Estrutura camelCase com RBAC granular';
+COMMENT ON TABLE "HU_User" IS 'Tabela de usuários v3.0 - Estrutura camelCase com RBAC granular';
 
-COMMENT ON COLUMN "User".id IS 'PK - Identificador único (usado em 100% dos JOINs)';
-COMMENT ON COLUMN "User".email IS 'Login principal - autenticação (índice UNIQUE)';
-COMMENT ON COLUMN "User"."name" IS 'Nome completo - exibição em UIs (90-100% das telas)';
-COMMENT ON COLUMN "User".password IS 'Hash bcrypt da senha - autenticação (NULL para usuários SSO apenas)';
-COMMENT ON COLUMN "User"."orgId" IS 'FK - Multi-tenancy crítico (90% das queries) → HU_Organization.id';
-COMMENT ON COLUMN "User"."roleCode" IS 'RBAC - 4 níveis (MS/OA/WM/UR) usado em 80% queries';
-COMMENT ON COLUMN "User"."inviteCode" IS 'Código de convite - onboarding (30% queries)';
-COMMENT ON COLUMN "User"."createdAt" IS 'Timestamp de criação - ordenação/auditoria';
-COMMENT ON COLUMN "User"."updatedAt" IS 'Timestamp de atualização - cache/auditoria';
-COMMENT ON COLUMN "User"."attributes" IS 'JSONB - Dados estendidos (profile, auth (sem password), subscription, preferences, onboarding, stats)';
+COMMENT ON COLUMN "HU_User".id IS 'PK - Identificador único (usado em 100% dos JOINs)';
+COMMENT ON COLUMN "HU_User".email IS 'Login principal - autenticação (índice UNIQUE)';
+COMMENT ON COLUMN "HU_User"."name" IS 'Nome completo - exibição em UIs (90-100% das telas)';
+COMMENT ON COLUMN "HU_User".password IS 'Hash bcrypt da senha - autenticação (NULL para usuários SSO apenas)';
+COMMENT ON COLUMN "HU_User"."orgId" IS 'FK - Multi-tenancy crítico (90% das queries) → HU_Organization.id';
+COMMENT ON COLUMN "HU_User"."role" IS 'RBAC - 4 níveis (MS/OA/WM/UR) usado em 80% queries';
+COMMENT ON COLUMN "HU_User"."inviteCode" IS 'Código de convite - onboarding (30% queries)';
+COMMENT ON COLUMN "HU_User"."createdAt" IS 'Timestamp de criação - ordenação/auditoria';
+COMMENT ON COLUMN "HU_User"."updatedAt" IS 'Timestamp de atualização - cache/auditoria';
+COMMENT ON COLUMN "HU_User"."attributes" IS 'JSONB - Dados estendidos (profile, auth (sem password), subscription, preferences, onboarding, stats)';
 
 -- ============================================================================
 -- 4. ÍNDICES PRINCIPAIS (camelCase)
@@ -112,41 +112,36 @@ COMMENT ON COLUMN "User"."attributes" IS 'JSONB - Dados estendidos (profile, aut
 -- PK e UNIQUE em email são criados automaticamente pelas constraints
 
 -- Índice composto para queries de listagem por org
-CREATE INDEX "idxUserOrgId" ON "User"("orgId", "createdAt" DESC);
+CREATE INDEX "idxUserOrgId" ON "HU_User"("orgId", "createdAt" DESC);
 
 -- Índice parcial para filtros por role (apenas admins)
--- Usado em: WHERE "roleCode" IN ('MS', 'OA', 'WM') (50% queries)
-CREATE INDEX "idxUserRole" ON "User"("roleCode") 
-  WHERE "roleCode" IN ('MS', 'OA', 'WM');
+-- Usado em: WHERE "role" IN ('MS', 'OA', 'WM') (50% queries)
+CREATE INDEX "idxUserRole" ON "HU_User"("role") 
+  WHERE "role" IN ('MS', 'OA', 'WM');
 
 -- Índice parcial em inviteCode (apenas não-nulos)
-CREATE INDEX "idxUserInviteCode" ON "User"("inviteCode")
+CREATE INDEX "idxUserInviteCode" ON "HU_User"("inviteCode")
   WHERE "inviteCode" IS NOT NULL;
 
 -- Índice em createdAt para ordenação
-CREATE INDEX "idxUserCreatedAt" ON "User"("createdAt" DESC);
-
--- Índice em isActive para soft delete
-CREATE INDEX "idxUserIsActive" ON "User"("isActive")
-  WHERE "isActive" = TRUE;
-
+CREATE INDEX "idxUserCreatedAt" ON "HU_User"("createdAt" DESC);
 
 -- ============================================================================
 -- 5. ÍNDICES JSONB
 -- ============================================================================
 
 -- Índice GIN genérico (queries complexas em múltiplos campos JSONB)
-CREATE INDEX "idxUserAttributes" ON "User" USING GIN ("attributes");
+CREATE INDEX "idxUserAttributes" ON "HU_User" USING GIN ("attributes");
 
 -- ============================================================================
 -- FIM DO SCHEMA
 -- ============================================================================
 
 -- RESUMO FINAL:
--- ✅ Tabela: "User" (9 campos)
--- ✅ Colunas camelCase: id, email, "name", password, "orgId", "roleCode", "inviteCode", "createdAt", "updatedAt", "attributes"
--- ✅ Índices camelCase: "idxUserOrgId", "idxUserRole", "idxUserInviteCode", "idxUserCreatedAt", "idxUserIsActive", "idxUserAttributes"
--- ✅ ENUM: "userRole" (MS, OA, WM, UR)
+-- ✅ Tabela: "HU_User" (9 campos)
+-- ✅ Colunas camelCase: id, email, "name", password, "orgId", "role", "inviteCode", "createdAt", "updatedAt", "attributes"
+-- ✅ Índices camelCase: "idxUserOrgId", "idxUserRole", "idxUserInviteCode", "idxUserCreatedAt", "idxUserAttributes"
+-- ✅ ENUM: "userRoleEnum" (MS, OA, WM, UR)
 -- ✅ FK corrigida: "orgId" → "HU_Organization"(id)
 -- ✅ Aspas duplas obrigatórias para preservar camelCase no PostgreSQL
 

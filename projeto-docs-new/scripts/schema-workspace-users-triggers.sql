@@ -1,5 +1,5 @@
 -- ============================================================================
--- TRIGGERS: User → WorkspaceUsers | Workspace → WorkspaceUsers
+-- TRIGGERS: HU_User → HU_Workspace_User | HU_Workspace → HU_Workspace_User
 -- ============================================================================
 -- Versão: 3.0
 -- Data: 2025-01-15
@@ -13,16 +13,16 @@
 -- DROP FUNÇÕES E TRIGGERS ANTIGOS (se existirem)
 -- ============================================================================
 
-DROP TRIGGER IF EXISTS "trgCreateWorkspaceAccessForUser" ON "User";
+DROP TRIGGER IF EXISTS "trgCreateWorkspaceAccessForUser" ON "HU_User";
 DROP TRIGGER IF EXISTS "trgCreateWorkspaceAccessForWorkspace" ON "HU_Workspace";
-DROP FUNCTION IF EXISTS "createWorkspaceAccessForUser"();
-DROP FUNCTION IF EXISTS "createWorkspaceAccessForWorkspace"();
+DROP FUNCTION IF EXISTS createWorkspaceAccessForUser();
+DROP FUNCTION IF EXISTS createWorkspaceAccessForWorkspace();
 
 -- ============================================================================
 -- FUNÇÃO: Criar Acesso Automático para Novo Usuário
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION "createWorkspaceAccessForUser"()
+CREATE OR REPLACE FUNCTION createWorkspaceAccessForUser()
 RETURNS TRIGGER AS $$
 DECLARE
   v_org_id UUID;
@@ -63,42 +63,34 @@ BEGIN
     ORDER BY "createdAt" ASC
     LIMIT 1;
     
-    -- 3. Criar acesso ao workspace pessoal (OWNER)
+    -- 3. Criar acesso ao workspace pessoal
     IF v_personal_workspace_id IS NOT NULL THEN
-      INSERT INTO "WorkspaceUsers" (
-        "workspaceId",
+      INSERT INTO "HU_Workspace_User" (
+        "wkspId",
         "userId",
-        "role",
-        "isActive",
-        "permissions"
+        "isActive"
       ) VALUES (
         v_personal_workspace_id,
         NEW.id,
-        'OWNER',
-        TRUE,
-        '{"canInvite": true, "canManage": true, "canDelete": true}'::jsonb
+        TRUE
       );
       
-      RAISE NOTICE 'Acesso OWNER criado para workspace pessoal %', v_personal_workspace_id;
+      RAISE NOTICE 'Acesso criado para workspace pessoal %', v_personal_workspace_id;
     END IF;
     
-    -- 4. Criar acesso ao workspace organizacional (MEMBER)
+    -- 4. Criar acesso ao workspace organizacional
     IF v_organizational_workspace_id IS NOT NULL THEN
-      INSERT INTO "WorkspaceUsers" (
-        "workspaceId",
+      INSERT INTO "HU_Workspace_User" (
+        "wkspId",
         "userId",
-        "role",
-        "isActive",
-        "permissions"
+        "isActive"
       ) VALUES (
         v_organizational_workspace_id,
         NEW.id,
-        'MEMBER',
-        TRUE,
-        '{"canInvite": false, "canManage": false, "canDelete": false}'::jsonb
+        TRUE
       );
       
-      RAISE NOTICE 'Acesso MEMBER criado para workspace organizacional %', v_organizational_workspace_id;
+      RAISE NOTICE 'Acesso criado para workspace organizacional %', v_organizational_workspace_id;
     END IF;
     
   ELSE
@@ -115,15 +107,15 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 
 CREATE TRIGGER "trgCreateWorkspaceAccessForUser"
-  AFTER INSERT ON "User"
+  AFTER INSERT ON "HU_User"
   FOR EACH ROW
-  EXECUTE FUNCTION "createWorkspaceAccessForUser"();
+  EXECUTE FUNCTION createWorkspaceAccessForUser();
 
 -- ============================================================================
 -- FUNÇÃO: Criar Acesso Automático para Novo Workspace (se for ORGANIZATIONAL)
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION "createWorkspaceAccessForWorkspace"()
+CREATE OR REPLACE FUNCTION createWorkspaceAccessForWorkspace()
 RETURNS TRIGGER AS $$
 DECLARE
   user_record RECORD;
@@ -134,23 +126,19 @@ BEGIN
     -- Dar acesso automático a todos os usuários da organização
     FOR user_record IN 
       SELECT id, "orgId"
-      FROM "User"
+      FROM "HU_User"
       WHERE "orgId" = NEW."orgId"
         AND "isActive" = TRUE  -- Assumindo que existe coluna isActive em User
     LOOP
-      -- Inserir acesso como MEMBER
-      INSERT INTO "WorkspaceUsers" (
-        "workspaceId",
+      -- Inserir acesso
+      INSERT INTO "HU_Workspace_User" (
+        "wkspId",
         "userId",
-        "role",
-        "isActive",
-        "permissions"
+        "isActive"
       ) VALUES (
         NEW.id,
         user_record.id,
-        'MEMBER',
-        TRUE,
-        '{"canInvite": false, "canManage": false, "canDelete": false}'::jsonb
+        TRUE
       );
     END LOOP;
     
@@ -168,19 +156,19 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER "trgCreateWorkspaceAccessForWorkspace"
   AFTER INSERT ON "HU_Workspace"
   FOR EACH ROW
-  EXECUTE FUNCTION "createWorkspaceAccessForWorkspace"();
+  EXECUTE FUNCTION createWorkspaceAccessForWorkspace();
 
 -- ============================================================================
 -- COMENTÁRIOS
 -- ============================================================================
 
-COMMENT ON FUNCTION "createWorkspaceAccessForUser"() IS 
+COMMENT ON FUNCTION createWorkspaceAccessForUser() IS 
   'Função trigger que cria acesso automático a workspaces quando um novo usuário é inserido (v3.0 - camelCase)';
 
-COMMENT ON TRIGGER "trgCreateWorkspaceAccessForUser" ON "User" IS 
-  'Trigger que executa após INSERT em User para criar acessos automáticos a workspaces (v3.0 - camelCase)';
+COMMENT ON TRIGGER "trgCreateWorkspaceAccessForUser" ON "HU_User" IS 
+  'Trigger que executa após INSERT em HU_User para criar acessos automáticos a workspaces (v3.0 - camelCase)';
 
-COMMENT ON FUNCTION "createWorkspaceAccessForWorkspace"() IS 
+COMMENT ON FUNCTION createWorkspaceAccessForWorkspace() IS 
   'Função trigger que cria acesso automático a todos os usuários quando um workspace organizacional é criado (v3.0 - camelCase)';
 
 COMMENT ON TRIGGER "trgCreateWorkspaceAccessForWorkspace" ON "HU_Workspace" IS 
@@ -190,24 +178,24 @@ COMMENT ON TRIGGER "trgCreateWorkspaceAccessForWorkspace" ON "HU_Workspace" IS
 -- RESUMO FINAL v3.0
 -- ============================================================================
 
--- ✅ ATIVO: Trigger User → WorkspaceUsers (Acesso Automático)
---    - Função: "createWorkspaceAccessForUser"()
+-- ✅ ATIVO: Trigger HU_User → HU_Workspace_User (Acesso Automático)
+--    - Função: createWorkspaceAccessForUser()
 --    - Trigger: "trgCreateWorkspaceAccessForUser"
---    - Tabela: "User" → "WorkspaceUsers"
+--    - Tabela: "HU_User" → "HU_Workspace_User"
 --    - Acessos: OWNER (workspace pessoal) + MEMBER (workspace organizacional)
 
 -- ✅ ATIVO: Trigger HU_Workspace → WorkspaceUsers (Acesso Automático)
---    - Função: "createWorkspaceAccessForWorkspace"()
+--    - Função: createWorkspaceAccessForWorkspace()
 --    - Trigger: "trgCreateWorkspaceAccessForWorkspace"
---    - Tabela: "HU_Workspace" → "WorkspaceUsers"
+--    - Tabela: "HU_Workspace" → "HU_Workspace_User"
 --    - Acesso: MEMBER automático para todos os usuários da org (apenas workspaces ORGANIZATIONAL)
 
 -- 📋 Nomenclatura v3.0 (TUDO camelCase + Prefixo HU_):
 --    - Tabelas Humana: "HU_Organization", "HU_Workspace" (HU_ + PascalCase com aspas)
---    - Tabela Junction: "WorkspaceUsers" (PascalCase com aspas)
---    - Tabela SDK: "User" (PascalCase com aspas)
---    - Colunas: "workspaceId", "userId", "role", "isActive", "permissions" (camelCase com aspas)
---    - Funções: "createWorkspaceAccessForUser", "createWorkspaceAccessForWorkspace" (camelCase com aspas)
+--    - Tabela Junction: "HU_Workspace_User" (PascalCase com aspas)
+--    - Tabela SDK: "HU_User" (PascalCase com aspas)
+--    - Colunas: "wkspId", "userId", "isActive", "joinedAt", "updatedAt" (camelCase com aspas)
+--    - Funções: createWorkspaceAccessForUser, createWorkspaceAccessForWorkspace (camelCase sem aspas)
 --    - Triggers: "trgCreateWorkspaceAccessForUser", "trgCreateWorkspaceAccessForWorkspace" (camelCase com aspas)
 --    - ENUMs: "workspaceTypeEnum" (PERSONAL, ORGANIZATIONAL, FUNCTIONAL)
 

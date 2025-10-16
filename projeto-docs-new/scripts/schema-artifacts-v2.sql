@@ -1,46 +1,47 @@
 -- ============================================================
--- ARTIFACTS v2.0 - Schema SQL
+-- ARTIFACTS v3.0 - Schema SQL (camelCase)
 -- ============================================================
--- Versão: 2.0
--- Data: 2025-01-10
+-- Versão: 3.0
+-- Data: 2025-01-15
 -- Descrição: Artefatos gerados (documentos, imagens, arquivos)
+-- Mudanças v3.0: Nomenclatura camelCase com aspas duplas
 -- ============================================================
 
 -- ============================================================
 -- ENUMS
 -- ============================================================
 
-CREATE TYPE status_artifact_enum AS ENUM (
+CREATE TYPE "statusEnum" AS ENUM (
   'ACT',      -- Active
   'ARC',      -- Archived
   'DEL'       -- Deleted
 );
 
 -- ============================================================
--- TABELA: artifacts
+-- TABELA: Artifacts
 -- ============================================================
 
-CREATE TABLE artifacts (
+CREATE TABLE "HU_Artifacts" (
   -- Identificador único
-  artf_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   
   -- Relacionamentos
-  chat_id UUID REFERENCES chats(chat_id) ON DELETE SET NULL,
-  workspace_id UUID NOT NULL REFERENCES workspaces(wksp_id),
+  "chatId" UUID REFERENCES "HU_Chats"(id) ON DELETE SET NULL,
+  "wkspId" UUID NOT NULL REFERENCES "HU_Workspace"(id),
   
   -- Identificação
-  artf_name VARCHAR(255) NOT NULL,
+  "name" VARCHAR(255) NOT NULL,
   
   -- Conteúdo
-  artf_content BYTEA NOT NULL,
-  artf_format VARCHAR(10) NOT NULL,
+  "content" BYTEA NOT NULL,
+  "format" VARCHAR(10) NOT NULL,
   
   -- Estado
-  artf_status status_artifact_enum NOT NULL DEFAULT 'ACT',
+  "status" "statusEnum" NOT NULL DEFAULT 'ACT',
   
   -- Timestamps
-  artf_created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  artf_updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ============================================================
@@ -48,57 +49,69 @@ CREATE TABLE artifacts (
 -- ============================================================
 
 -- Índices para relacionamentos
-CREATE INDEX idx_artifacts_chat ON artifacts(chat_id);
-CREATE INDEX idx_artifacts_workspace ON artifacts(workspace_id);
+CREATE INDEX "idxArtifactsChatId" ON "HU_Artifacts"("chatId");
+CREATE INDEX "idxArtifactsWkspId" ON "HU_Artifacts"("wkspId");
 
 -- Índice para status
-CREATE INDEX idx_artifacts_status ON artifacts(artf_status);
+CREATE INDEX "idxArtifactsStatus" ON "HU_Artifacts"("status");
 
 -- Índice para formato
-CREATE INDEX idx_artifacts_format ON artifacts(artf_format);
+CREATE INDEX "idxArtifactsFormat" ON "HU_Artifacts"("format");
 
 -- Índices para ordenação temporal
-CREATE INDEX idx_artifacts_created ON artifacts(artf_created_at DESC);
-CREATE INDEX idx_artifacts_updated ON artifacts(artf_updated_at DESC);
+CREATE INDEX "idxArtifactsCreatedAt" ON "HU_Artifacts"("createdAt" DESC);
+CREATE INDEX "idxArtifactsUpdatedAt" ON "HU_Artifacts"("updatedAt" DESC);
 
 -- Índices compostos para consultas frequentes
-CREATE INDEX idx_artifacts_workspace_status ON artifacts(workspace_id, artf_status);
-CREATE INDEX idx_artifacts_chat_status ON artifacts(chat_id, artf_status) WHERE chat_id IS NOT NULL;
-CREATE INDEX idx_artifacts_format_status ON artifacts(artf_format, artf_status);
+CREATE INDEX "idxArtifactsWkspStatus" ON "HU_Artifacts"("wkspId", "status");
+CREATE INDEX "idxArtifactsChatStatus" ON "HU_Artifacts"("chatId", "status") WHERE "chatId" IS NOT NULL;
+CREATE INDEX "idxArtifactsFormatStatus" ON "HU_Artifacts"("format", "status");
 
 -- Índice para busca full-text no nome
-CREATE INDEX idx_artifacts_name_fts ON artifacts 
-  USING GIN (to_tsvector('portuguese', artf_name));
+CREATE INDEX "idxArtifactsNameFts" ON "HU_Artifacts" 
+  USING GIN (to_tsvector('portuguese', "name"));
 
 -- ============================================================
--- TRIGGER (auto-update updated_at)
+-- TRIGGER (auto-update updatedAt)
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION update_artf_updated_at()
+CREATE OR REPLACE FUNCTION updateArtifactUpdatedAt()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.artf_updated_at = NOW();
+  NEW."updatedAt" = NOW();
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_artf_updated_at
-  BEFORE UPDATE ON artifacts
+CREATE TRIGGER "trgUpdateArtifactUpdatedAt"
+  BEFORE UPDATE ON "HU_Artifacts"
   FOR EACH ROW
-  EXECUTE FUNCTION update_artf_updated_at();
+  EXECUTE FUNCTION updateArtifactUpdatedAt();
 
 -- ============================================================
 -- COMENTÁRIOS DAS COLUNAS
 -- ============================================================
 
-COMMENT ON COLUMN artifacts.artf_id IS 'Identificador único do artefato (PK)';
-COMMENT ON COLUMN artifacts.chat_id IS 'ID do chat que gerou o artefato (FK → chats_v5, NULLABLE)';
-COMMENT ON COLUMN artifacts.workspace_id IS 'ID do workspace do artefato (FK → workspaces)';
-COMMENT ON COLUMN artifacts.artf_name IS 'Nome do artefato exibido na UI';
-COMMENT ON COLUMN artifacts.artf_content IS 'Conteúdo binário do artefato (BYTEA)';
-COMMENT ON COLUMN artifacts.artf_format IS 'Formato do arquivo (MD, SVG, PDF, HTML, JSON, PNG, DOCX, etc.)';
-COMMENT ON COLUMN artifacts.artf_status IS 'Status do artefato (ACT, ARC, DEL)';
-COMMENT ON COLUMN artifacts.artf_created_at IS 'Data e hora de criação do artefato';
-COMMENT ON COLUMN artifacts.artf_updated_at IS 'Data e hora da última atualização (atualizado automaticamente via trigger)';
+COMMENT ON TABLE "HU_Artifacts" IS 'Tabela de artefatos v3.0 - Documentos, imagens e arquivos gerados';
 
+COMMENT ON COLUMN "HU_Artifacts".id IS 'PK - Identificador único do artefato';
+COMMENT ON COLUMN "HU_Artifacts"."chatId" IS 'FK - ID do chat que gerou o artefato → Chats.id (NULLABLE)';
+COMMENT ON COLUMN "HU_Artifacts"."wkspId" IS 'FK - ID do workspace do artefato → HU_Workspace.id';
+COMMENT ON COLUMN "HU_Artifacts"."name" IS 'Nome do artefato exibido na UI';
+COMMENT ON COLUMN "HU_Artifacts"."content" IS 'Conteúdo binário do artefato (BYTEA)';
+COMMENT ON COLUMN "HU_Artifacts"."format" IS 'Formato do arquivo (MD, SVG, PDF, HTML, JSON, PNG, DOCX, etc.)';
+COMMENT ON COLUMN "HU_Artifacts"."status" IS 'Status do artefato (ACT, ARC, DEL)';
+COMMENT ON COLUMN "HU_Artifacts"."createdAt" IS 'Data e hora de criação do artefato';
+COMMENT ON COLUMN "HU_Artifacts"."updatedAt" IS 'Data e hora da última atualização (atualizado automaticamente via trigger)';
 
+-- ============================================================================
+-- FIM DO SCHEMA
+-- ============================================================================
+
+-- RESUMO FINAL:
+-- ✅ Tabela: "HU_Artifacts" (9 campos)
+-- ✅ Colunas camelCase: id, "chatId", "wkspId", "name", "content", "format", "status", "createdAt", "updatedAt"
+-- ✅ Índices camelCase: "idxArtifactsChatId", "idxArtifactsWkspId", "idxArtifactsStatus", etc.
+-- ✅ ENUM: "statusEnum" (ACT, ARC, DEL)
+-- ✅ FKs: "chatId" → "Chats"(id), "wkspId" → "HU_Workspace"(id)
+-- ✅ Aspas duplas obrigatórias para preservar camelCase no PostgreSQL

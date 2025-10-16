@@ -1,23 +1,24 @@
 -- ============================================================
--- TOOLS_MCP v2.0 - Schema SQL
+-- TOOLS_MCP v3.0 - Schema SQL (camelCase)
 -- ============================================================
--- Versão: 2.0
--- Data: 2025-01-10
+-- Versão: 3.0
+-- Data: 2025-01-15
 -- Descrição: Ferramentas MCP (Model Context Protocol)
+-- Mudanças v3.0: Nomenclatura camelCase com aspas duplas
 -- ============================================================
 
 -- ============================================================
 -- ENUMS
 -- ============================================================
 
-CREATE TYPE tool_type_enum AS ENUM (
+CREATE TYPE "toolTypeEnum" AS ENUM (
   'DATABASE',     -- Ferramenta de banco de dados
   'API',          -- Ferramenta de API
   'FILESYSTEM',   -- Ferramenta de sistema de arquivos
   'CUSTOM'        -- Ferramenta customizada
 );
 
-CREATE TYPE auth_type_enum AS ENUM (
+CREATE TYPE "authTypeEnum" AS ENUM (
   'BEARER',       -- Bearer token
   'OAUTH',        -- OAuth 2.0
   'API_KEY',      -- API Key
@@ -25,38 +26,38 @@ CREATE TYPE auth_type_enum AS ENUM (
 );
 
 -- ============================================================
--- TABELA: tools_mcp
+-- TABELA: ToolsMcp
 -- ============================================================
 
-CREATE TABLE tools_mcp (
+CREATE TABLE "HU_Tools_MCP" (
   -- Identificador único
-  tool_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   
   -- Multi-tenancy (isolamento por organização)
-  organization_id UUID NOT NULL REFERENCES organizations(orgs_id) ON DELETE CASCADE,
+  "orgId" UUID NOT NULL REFERENCES "HU_Organization"(id) ON DELETE CASCADE,
   
   -- Propriedade (quem configurou)
-  configured_by_user_id UUID NOT NULL REFERENCES users(user_id),
+  "configuredByUserId" UUID NOT NULL REFERENCES "HU_User"(id),
   
   -- Identificação
-  tool_name VARCHAR(255) NOT NULL,
-  tool_type tool_type_enum NOT NULL,
+  "name" VARCHAR(255) NOT NULL,
+  "type" "toolTypeEnum" NOT NULL,
   
   -- Autenticação
-  tool_auth_type auth_type_enum NOT NULL,
+  "authType" "authTypeEnum" NOT NULL,
   
   -- Atributos JSONB (configurações e metadados)
-  tool_attributes JSONB NOT NULL DEFAULT '{}'::jsonb,
+  "attributes" JSONB NOT NULL DEFAULT '{}'::jsonb,
   
   -- Estado
-  tool_is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  "isActive" BOOLEAN NOT NULL DEFAULT TRUE,
   
   -- Timestamps
-  tool_created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  tool_updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   
   -- Constraints
-  CONSTRAINT valid_attributes CHECK (jsonb_typeof(tool_attributes) = 'object')
+  CONSTRAINT valid_attributes CHECK (jsonb_typeof("attributes") = 'object')
 );
 
 -- ============================================================
@@ -64,69 +65,64 @@ CREATE TABLE tools_mcp (
 -- ============================================================
 
 -- Índices para relacionamentos
-CREATE INDEX idx_tools_org ON tools_mcp(organization_id);
-CREATE INDEX idx_tools_configured_by ON tools_mcp(configured_by_user_id);
+CREATE INDEX "idxToolsMcpOrgId" ON "HU_Tools_MCP"("orgId");
+CREATE INDEX "idxToolsMcpConfiguredBy" ON "HU_Tools_MCP"("configuredByUserId");
 
 -- Índices para tipo e autenticação
-CREATE INDEX idx_tools_type ON tools_mcp(tool_type);
-CREATE INDEX idx_tools_auth ON tools_mcp(tool_auth_type);
+CREATE INDEX "idxToolsMcpType" ON "HU_Tools_MCP"("type");
+CREATE INDEX "idxToolsMcpAuthType" ON "HU_Tools_MCP"("authType");
 
--- Índice parcial: apenas ferramentas ativas
-CREATE INDEX idx_tools_active ON tools_mcp(tool_is_active) WHERE tool_is_active = TRUE;
+-- Índice parcial para ferramentas ativas
+CREATE INDEX "idxToolsMcpActive" ON "HU_Tools_MCP"("isActive") WHERE "isActive" = TRUE;
 
--- Índice para ordenação por data de atualização
-CREATE INDEX idx_tools_updated ON tools_mcp(tool_updated_at DESC);
+-- Índice composto para consultas frequentes
+CREATE INDEX "idxToolsMcpOrgActive" ON "HU_Tools_MCP"("orgId", "isActive");
 
--- Índices compostos para consultas frequentes
-CREATE INDEX idx_tools_org_type ON tools_mcp(organization_id, tool_type);
-CREATE INDEX idx_tools_org_active ON tools_mcp(organization_id, tool_is_active);
-CREATE INDEX idx_tools_type_active ON tools_mcp(tool_type, tool_is_active);
-
--- Índice GIN geral para attributes
-CREATE INDEX idx_tools_attributes_gin ON tools_mcp USING GIN (tool_attributes);
-
--- Índices JSONB para consultas específicas em tool_attributes
-CREATE INDEX idx_tools_category ON tools_mcp 
-  USING GIN ((tool_attributes->'basic_info'->>'category'));
-CREATE INDEX idx_tools_tags ON tools_mcp 
-  USING GIN ((tool_attributes->'basic_info'->'tags'));
-CREATE INDEX idx_tools_version ON tools_mcp 
-  USING GIN ((tool_attributes->'basic_info'->>'version'));
-
--- Índice para busca full-text no nome
-CREATE INDEX idx_tools_name_fts ON tools_mcp 
-  USING GIN (to_tsvector('portuguese', tool_name));
+-- Índice GIN para attributes
+CREATE INDEX "idxToolsMcpAttributes" ON "HU_Tools_MCP" USING GIN ("attributes");
 
 -- ============================================================
--- TRIGGER (auto-update updated_at)
+-- TRIGGER (auto-update updatedAt)
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION update_tool_updated_at()
+CREATE OR REPLACE FUNCTION updateToolMcpUpdatedAt()
 RETURNS TRIGGER AS $$
 BEGIN
-  NEW.tool_updated_at = NOW();
+  NEW."updatedAt" = NOW();
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_tool_updated_at
-  BEFORE UPDATE ON tools_mcp
+CREATE TRIGGER "trgUpdateToolMcpUpdatedAt"
+  BEFORE UPDATE ON "HU_Tools_MCP"
   FOR EACH ROW
-  EXECUTE FUNCTION update_tool_updated_at();
+  EXECUTE FUNCTION updateToolMcpUpdatedAt();
 
 -- ============================================================
 -- COMENTÁRIOS DAS COLUNAS
 -- ============================================================
 
-COMMENT ON COLUMN tools_mcp.tool_id IS 'Identificador único da ferramenta MCP (PK)';
-COMMENT ON COLUMN tools_mcp.organization_id IS 'ID da organização dona da ferramenta (FK → organizations)';
-COMMENT ON COLUMN tools_mcp.configured_by_user_id IS 'ID do usuário que configurou a ferramenta (FK → users)';
-COMMENT ON COLUMN tools_mcp.tool_name IS 'Nome da ferramenta exibido na UI';
-COMMENT ON COLUMN tools_mcp.tool_type IS 'Tipo da ferramenta (DATABASE, API, FILESYSTEM, CUSTOM)';
-COMMENT ON COLUMN tools_mcp.tool_auth_type IS 'Tipo de autenticação (BEARER, OAUTH, API_KEY, NONE)';
-COMMENT ON COLUMN tools_mcp.tool_attributes IS 'Atributos JSONB (basic_info, auth_config, connection_config, performance_metrics, compliance_audit, monitoring_alerting, ai_enhancement)';
-COMMENT ON COLUMN tools_mcp.tool_is_active IS 'Indica se a ferramenta está ativa (soft delete)';
-COMMENT ON COLUMN tools_mcp.tool_created_at IS 'Data e hora de criação da ferramenta';
-COMMENT ON COLUMN tools_mcp.tool_updated_at IS 'Data e hora da última atualização (atualizado automaticamente via trigger)';
+COMMENT ON TABLE "HU_Tools_MCP" IS 'Tabela de ferramentas MCP v3.0 - Model Context Protocol';
 
+COMMENT ON COLUMN "HU_Tools_MCP".id IS 'PK - Identificador único da ferramenta MCP';
+COMMENT ON COLUMN "HU_Tools_MCP"."orgId" IS 'FK - ID da organização → HU_Organization.id';
+COMMENT ON COLUMN "HU_Tools_MCP"."configuredByUserId" IS 'FK - ID do usuário que configurou → User.id';
+COMMENT ON COLUMN "HU_Tools_MCP"."name" IS 'Nome da ferramenta MCP';
+COMMENT ON COLUMN "HU_Tools_MCP"."type" IS 'Tipo da ferramenta (DATABASE, API, FILESYSTEM, CUSTOM)';
+COMMENT ON COLUMN "HU_Tools_MCP"."authType" IS 'Tipo de autenticação (BEARER, OAUTH, API_KEY, NONE)';
+COMMENT ON COLUMN "HU_Tools_MCP"."attributes" IS 'Atributos JSONB (configurações e metadados)';
+COMMENT ON COLUMN "HU_Tools_MCP"."isActive" IS 'Indica se a ferramenta está ativa';
+COMMENT ON COLUMN "HU_Tools_MCP"."createdAt" IS 'Data de criação';
+COMMENT ON COLUMN "HU_Tools_MCP"."updatedAt" IS 'Data de última atualização (atualizado automaticamente via trigger)';
 
+-- ============================================================================
+-- FIM DO SCHEMA
+-- ============================================================================
+
+-- RESUMO FINAL:
+-- ✅ Tabela: "HU_Tools_MCP" (9 campos)
+-- ✅ Colunas camelCase: id, "orgId", "configuredByUserId", "name", "type", "authType", "attributes", "isActive", "createdAt", "updatedAt"
+-- ✅ Índices camelCase: "idxToolsMcpOrgId", "idxToolsMcpConfiguredBy", "idxToolsMcpType", etc.
+-- ✅ ENUMs: "toolTypeEnum", "authTypeEnum"
+-- ✅ FKs: "orgId" → "HU_Organization"(id), "configuredByUserId" → "User"(id)
+-- ✅ Aspas duplas obrigatórias para preservar camelCase no PostgreSQL
