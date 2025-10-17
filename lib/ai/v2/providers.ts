@@ -1,15 +1,6 @@
-import { createGateway } from "@ai-sdk/gateway";
-import {
-  customProvider,
-  extractReasoningMiddleware,
-  wrapLanguageModel,
-} from "ai";
+import { customProvider } from "ai";
 import { isTestEnvironment } from "../../constants";
-
-// Configure Gateway with API key if available
-const gateway = createGateway({
-  apiKey: process.env.AI_GATEWAY_API_KEY,
-});
+import { createN8nLanguageModel } from "./n8n-provider";
 
 export const myProvider = isTestEnvironment
   ? (() => {
@@ -30,12 +21,17 @@ export const myProvider = isTestEnvironment
     })()
   : customProvider({
       languageModels: {
-        "chat-model": gateway.languageModel("xai/grok-2-vision-1212"),
-        "chat-model-reasoning": wrapLanguageModel({
-          model: gateway.languageModel("xai/grok-3-mini"),
-          middleware: extractReasoningMiddleware({ tagName: "think" }),
+        "chat-model": createN8nLanguageModel({
+          modelId: "gpt-4o-mini",
         }),
-        "title-model": gateway.languageModel("xai/grok-2-1212"),
-        "artifact-model": gateway.languageModel("xai/grok-2-1212"),
+        "chat-model-reasoning": createN8nLanguageModel({
+          modelId: "gpt-4o-mini",
+        }),
+        "title-model": createN8nLanguageModel({
+          modelId: "gpt-4o-mini",
+        }),
+        "artifact-model": createN8nLanguageModel({
+          modelId: "gpt-4o-mini",
+        }),
       },
     });

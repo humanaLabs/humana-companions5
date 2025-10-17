@@ -1,36 +1,31 @@
-import { createUIMessageStream, JsonToSseTransformStream } from "ai";
+import { geolocation } from "@vercel/functions";
+import {
+  convertToModelMessages,
+  createUIMessageStream,
+  JsonToSseTransformStream,
+} from "ai";
 import { auth, type UserType } from "@/app/(auth)/auth";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/v2/models";
+import { type RequestHints, systemPrompt } from "@/lib/ai/v2/prompts";
 import {
   deleteChatById,
   getChatById,
   getMessageCountByUserId,
+  getMessagesByChatId,
   saveChat,
   saveMessages,
 } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
 import type { ChatMessage } from "@/lib/types";
-import { generateUUID } from "@/lib/utils";
+import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../../actions";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
 export const maxDuration = 60;
 
-// Configuração do webhook n8n
-const N8N_WEBHOOK_URL = "https://n8n.humana.ai/webhook/chat";
-
-// Função auxiliar para extrair texto da mensagem
-function extractMessageText(message: ChatMessage): string {
-  if (message.parts && message.parts.length > 0) {
-    const textPart = message.parts.find((part) => part.type === "text");
-    if (textPart && "text" in textPart) {
-      return textPart.text;
-    }
-  }
-  return "";
-}
+const N8N_WEBHOOK_URL = "https://n8n.humana.ai/webhook/chat/completions";
 
 export async function POST(request: Request) {
   let requestBody: PostRequestBody;
@@ -46,11 +41,12 @@ export async function POST(request: Request) {
     const {
       id,
       message,
+      selectedChatModel,
       selectedVisibilityType,
     }: {
       id: string;
       message: ChatMessage;
-      selectedChatModel?: ChatModel["id"];
+      selectedChatModel: ChatModel["id"];
       selectedVisibilityType: VisibilityType;
     } = requestBody;
 
@@ -90,12 +86,17 @@ export async function POST(request: Request) {
       });
     }
 
-    // Extrai o texto da mensagem do usuário
-    const userMessageText = extractMessageText(message);
+    const messagesFromDb = await getMessagesByChatId({ id });
+    const uiMessages = [...convertToUIMessages(messagesFromDb), message];
 
-    if (!userMessageText) {
-      return new ChatSDKError("bad_request:api").toResponse();
-    }
+    const { longitude, latitude, city, country } = geolocation(request);
+
+    const requestHints: RequestHints = {
+      longitude,
+      latitude,
+      city,
+      country,
+    };
 
     await saveMessages({
       messages: [
@@ -110,88 +111,184 @@ export async function POST(request: Request) {
       ],
     });
 
-    // Chama o webhook do n8n
-    console.log("Enviando mensagem para n8n:", {
-      text: userMessageText,
-      sessionId: id,
-    });
-
-    const n8nResponse = await fetch(N8N_WEBHOOK_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        text: userMessageText,
-        sessionId: id,
-      }),
-    });
-
-    if (!n8nResponse.ok) {
-      const errorText = await n8nResponse.text();
-      console.error("Erro na resposta do n8n:", {
-        status: n8nResponse.status,
-        statusText: n8nResponse.statusText,
-        body: errorText,
-      });
-      throw new Error(`n8n webhook error: ${n8nResponse.status}`);
-    }
-
-    const n8nData = await n8nResponse.json();
-    console.log("Resposta do n8n:", n8nData);
-
-    // Extrai o texto da resposta do n8n
-    const assistantResponseText =
-      typeof n8nData === "string"
-        ? n8nData
-        : n8nData.output ||
-          n8nData.response ||
-          n8nData.text ||
-          JSON.stringify(n8nData);
-
-    // Cria stream para enviar a resposta
-    const assistantMessageId = generateUUID();
     const stream = createUIMessageStream({
-      execute: async ({ writer }) => {
-        // Inicia a mensagem do assistente
-        writer.write({
-          type: "start",
-          messageId: assistantMessageId,
+      execute: async ({ writer: dataStream }) => {
+        const systemPromptText = systemPrompt({
+          selectedChatModel,
+          requestHints,
         });
 
-        // Inicia o texto
-        writer.write({
-          type: "text-start",
-          id: assistantMessageId,
+        console.log("[Chat API V2] Calling n8n directly");
+
+        // Preparar mensagens
+        const n8nMessages = [
+          { role: "system", content: systemPromptText },
+          ...convertToModelMessages(uiMessages).map((msg) => {
+            let content = "";
+            if (Array.isArray(msg.content)) {
+              content = msg.content
+                .map((part) => {
+                  if (part.type === "text") {
+                    return part.text;
+                  }
+                  return "";
+                })
+                .join("\n");
+            } else if (typeof msg.content === "string") {
+              content = msg.content;
+            }
+            return {
+              role: msg.role,
+              content,
+            };
+          }),
+        ];
+
+        // Definir tools em formato OpenAI
+        const tools = [
+          {
+            type: "function",
+            function: {
+              name: "getWeather",
+              description: "Get the current weather at a location",
+              parameters: {
+                type: "object",
+                properties: {
+                  latitude: { type: "number" },
+                  longitude: { type: "number" },
+                },
+                required: ["latitude", "longitude"],
+              },
+            },
+          },
+        ];
+
+        // Chamar n8n
+        const response = await fetch(N8N_WEBHOOK_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: selectedChatModel,
+            stream: true,
+            messages: n8nMessages,
+            tools,
+          }),
         });
 
-        // Simula streaming da resposta palavra por palavra
-        const words = assistantResponseText.split(" ");
-
-        for (const word of words) {
-          writer.write({
-            type: "text-delta",
-            delta: `${word} `,
-            id: assistantMessageId,
-          });
-          // Pequeno delay para simular streaming
-          await new Promise((resolve) => setTimeout(resolve, 30));
+        if (!response.ok) {
+          throw new Error(`N8n API error: ${response.status}`);
         }
 
-        // Finaliza o texto
-        writer.write({
-          type: "text-end",
-          id: assistantMessageId,
-        });
+        if (!response.body) {
+          throw new Error("Response body is null");
+        }
 
-        // Finaliza a mensagem
-        writer.write({
-          type: "finish",
-        });
+        console.log("[Chat API V2] Streaming from n8n...");
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let fullText = "";
+
+        const textStepId = generateUUID();
+        let hasStartedText = false;
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) {
+              console.log("[Chat API V2] Stream done");
+              break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+
+            for (const line of lines) {
+              const trimmedLine = line.trim();
+
+              if (!trimmedLine || trimmedLine === "data: [DONE]") {
+                continue;
+              }
+
+              if (trimmedLine.startsWith("data:")) {
+                const jsonStr = trimmedLine.slice(5).trim();
+
+                if (!jsonStr) {
+                  continue;
+                }
+
+                try {
+                  const data = JSON.parse(jsonStr);
+                  const delta = data.choices?.[0]?.delta;
+
+                  // Processar texto
+                  let content = delta?.content;
+
+                  if (!content && typeof data.content === "string") {
+                    content = data.content;
+                  }
+
+                  if (!content && typeof data.output === "string") {
+                    content = data.output;
+                  }
+
+                  if (content) {
+                    console.log("[Chat API V2] Text chunk:", content);
+                    fullText += content;
+
+                    // Enviar como parte da mensagem, não annotation
+                    if (!hasStartedText) {
+                      dataStream.write({
+                        type: "text-start",
+                        id: textStepId,
+                      });
+                      hasStartedText = true;
+                    }
+
+                    dataStream.write({
+                      type: "text-delta",
+                      delta: content,
+                      id: textStepId,
+                    });
+                  }
+
+                  // TODO: Processar tool calls
+                  if (delta?.tool_calls) {
+                    console.log("[Chat API V2] Tool calls:", delta.tool_calls);
+                  }
+                } catch (e) {
+                  console.error("[Chat API V2] Parse error:", e);
+                }
+              }
+            }
+          }
+        } finally {
+          reader.releaseLock();
+        }
+
+        // Finalizar texto
+        if (hasStartedText) {
+          dataStream.write({
+            type: "text-end",
+            id: textStepId,
+          });
+        }
+
+        console.log("[Chat API V2] Full text:", fullText);
       },
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
-        // Salva as mensagens geradas
+        console.log(
+          "[Chat API V2] onFinish - Saving",
+          messages.length,
+          "messages"
+        );
+
         await saveMessages({
           messages: messages.map((currentMessage) => ({
             id: currentMessage.id,
@@ -207,6 +304,8 @@ export async function POST(request: Request) {
         return "Oops, ocorreu um erro!";
       },
     });
+
+    console.log("[Chat API V2] Returning stream");
 
     return new Response(stream.pipeThrough(new JsonToSseTransformStream()));
   } catch (error) {
@@ -245,13 +344,21 @@ export async function DELETE(request: Request) {
     return new ChatSDKError("unauthorized:chat").toResponse();
   }
 
-  const chat = await getChatById({ id });
+  try {
+    const chat = await getChatById({ id });
 
-  if (chat?.userId !== session.user.id) {
-    return new ChatSDKError("forbidden:chat").toResponse();
+    if (!chat) {
+      return new ChatSDKError("not_found:chat").toResponse();
+    }
+
+    if (chat.userId !== session.user.id) {
+      return new ChatSDKError("forbidden:chat").toResponse();
+    }
+
+    await deleteChatById({ id });
+
+    return new Response("Chat deleted", { status: 200 });
+  } catch {
+    return new ChatSDKError("not_found:chat").toResponse();
   }
-
-  const deletedChat = await deleteChatById({ id });
-
-  return Response.json(deletedChat, { status: 200 });
 }
