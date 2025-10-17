@@ -23,15 +23,15 @@ export const myProvider = isTestEnvironment
       languageModels: {
         "chat-model": createN8nLanguageModel({
           modelId: "gpt-4o-mini",
-        }),
+        }) as any,
         "chat-model-reasoning": createN8nLanguageModel({
           modelId: "gpt-4o-mini",
-        }),
+        }) as any,
         "title-model": createN8nLanguageModel({
           modelId: "gpt-4o-mini",
-        }),
+        }) as any,
         "artifact-model": createN8nLanguageModel({
           modelId: "gpt-4o-mini",
-        }),
+        }) as any,
       },
     });

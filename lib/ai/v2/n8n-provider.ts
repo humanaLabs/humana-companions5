@@ -1,10 +1,4 @@
-import type {
-  LanguageModelV1,
-  LanguageModelV1CallOptions,
-  LanguageModelV1CallWarning,
-  LanguageModelV1FinishReason,
-  LanguageModelV1StreamPart,
-} from "ai";
+import type { LanguageModel } from "ai";
 
 const N8N_WEBHOOK_URL = "https://n8n.humana.ai/webhook/chat/completions";
 
@@ -31,7 +25,7 @@ function convertToolsToOpenAIFormat(tools?: Record<string, any>) {
 
 export function createN8nLanguageModel(
   config: N8nLanguageModelConfig = {}
-): LanguageModelV1 {
+): LanguageModel {
   const modelId = config.modelId || config.defaultModel || "gpt-4o-mini";
 
   return {
@@ -39,16 +33,17 @@ export function createN8nLanguageModel(
     provider: "n8n",
     modelId,
     defaultObjectGenerationMode: "json",
+    supportedUrls: [],
     supportsImageUrls: false,
     supportsStructuredOutputs: false,
 
-    async doGenerate(options: LanguageModelV1CallOptions) {
-      const messages = options.prompt.map((msg) => {
+    doGenerate: async (options: any) => {
+      const messages = options.prompt.map((msg: any) => {
         let content = "";
 
         if (Array.isArray(msg.content)) {
           content = msg.content
-            .map((part) => {
+            .map((part: any) => {
               if (part.type === "text") {
                 return part.text;
               }
@@ -111,7 +106,7 @@ export function createN8nLanguageModel(
           responseContent.length > 0
             ? responseContent
             : [{ type: "text", text: content }],
-        finishReason: "stop" as LanguageModelV1FinishReason,
+        finishReason: "stop",
         usage: {
           inputTokens: data.usage?.prompt_tokens || 0,
           outputTokens: data.usage?.completion_tokens || 0,
@@ -120,18 +115,18 @@ export function createN8nLanguageModel(
             (data.usage?.completion_tokens || 0),
         },
         rawCall: { rawPrompt: messages, rawSettings: {} },
-        warnings: [] as LanguageModelV1CallWarning[],
+        warnings: [],
       };
     },
 
-    async doStream(options: LanguageModelV1CallOptions) {
+    doStream: async (options: any) => {
       console.log("[N8N Provider] doStream called");
-      const messages = options.prompt.map((msg) => {
+      const messages = options.prompt.map((msg: any) => {
         let content = "";
 
         if (Array.isArray(msg.content)) {
           content = msg.content
-            .map((part) => {
+            .map((part: any) => {
               if (part.type === "text") {
                 return part.text;
               }
@@ -156,17 +151,24 @@ export function createN8nLanguageModel(
         tools ? `${tools.length} tools` : "no tools"
       );
 
+      // 🔍 DEBUG: Ver exatamente o que está sendo enviado
+      const requestBody = {
+        model: modelId,
+        stream: true,
+        messages,
+        tools,
+      };
+      console.log(
+        "[N8N Provider] Request body tools:",
+        JSON.stringify(requestBody.tools, null, 2)
+      );
+
       const response = await fetch(N8N_WEBHOOK_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          model: modelId,
-          stream: true,
-          messages,
-          tools,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -181,8 +183,11 @@ export function createN8nLanguageModel(
       const decoder = new TextDecoder();
       let buffer = "";
 
+      const stepId = `step-${Date.now()}`;
+      let hasStartedText = false;
+
       return {
-        stream: new ReadableStream<LanguageModelV1StreamPart>({
+        stream: new ReadableStream({
           async start(controller) {
             try {
               // Acumula tool calls que vêm fragmentados
@@ -221,6 +226,12 @@ export function createN8nLanguageModel(
                       const data = JSON.parse(jsonStr);
                       const delta = data.choices?.[0]?.delta;
 
+                      // 🔍 DEBUG: Ver o que o n8n está retornando
+                      console.log(
+                        "[N8N Provider] Raw delta:",
+                        JSON.stringify(delta)
+                      );
+
                       // Processar content (texto)
                       let content = delta?.content;
 
@@ -233,9 +244,21 @@ export function createN8nLanguageModel(
                       }
 
                       if (content) {
+                        // Enviar text-start na primeira vez
+                        if (!hasStartedText) {
+                          controller.enqueue({
+                            type: "text-start",
+                            id: stepId,
+                          });
+                          hasStartedText = true;
+                          console.log("[N8N Provider] Enqueued text-start");
+                        }
+
+                        // Enviar text-delta com id e delta (formato AI SDK v5)
                         controller.enqueue({
-                          type: "text-delta" as const,
-                          textDelta: content,
+                          type: "text-delta",
+                          id: stepId,
+                          delta: content,
                         });
                         console.log(
                           "[N8N Provider] Enqueued text-delta:",
@@ -280,6 +303,15 @@ export function createN8nLanguageModel(
                 }
               }
 
+              // Finalizar texto se foi iniciado
+              if (hasStartedText) {
+                controller.enqueue({
+                  type: "text-finish",
+                  id: stepId,
+                });
+                console.log("[N8N Provider] Enqueued text-finish");
+              }
+
               // Ao final do stream, emitir tool calls completos
               for (const toolCall of Object.values(toolCallsBuffer)) {
                 if (toolCall.id && toolCall.function.name) {
@@ -288,7 +320,7 @@ export function createN8nLanguageModel(
                     toolCall.function.name
                   );
                   controller.enqueue({
-                    type: "tool-call" as const,
+                    type: "tool-call",
                     toolCallId: toolCall.id,
                     toolName: toolCall.function.name,
                     args: JSON.parse(toolCall.function.arguments || "{}"),
@@ -314,8 +346,8 @@ export function createN8nLanguageModel(
           },
         }),
         rawCall: { rawPrompt: messages, rawSettings: {} },
-        warnings: [] as LanguageModelV1CallWarning[],
+        warnings: [],
       };
     },
-  };
+  } as unknown as LanguageModel;
 }
