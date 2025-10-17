@@ -1,0 +1,122 @@
+====DEFINICOES GERAIS====
+-As tabelas terão como colunas somente campos chave ou headear e um jsonb com demais atributos. Ex: Organizacao (ID, NAME, ATRIBUTOS_ORGANIZACAO)
+-Para listas fixas vamos usar ENUMS. Ex: ROLE_CODES (MS=MaterSys, OA=OrgAdmin, WM=WspManager, UR=User), RESOURCE_KIND (ORG, WSP, CMP, PRL, CHT, KNW, TOL), ACTION (REA, WRI, UPD, MNG)
+-As lista de roles determina o acesso às funcionalidades/telas (via route auth) e a tabela de permissões determina o acesso aos dados (via RLS) conforme RESOURCE e ACTION.
+-No app a identidade do usuario (GUC com ORG, WSP, ROLE e USRID) é feita no request do BD com SET LOCAL. A partir daí assume o RLS configurado em cada tabela.
+
+====PARAMETROS DA MODELAGEM DE DADOS====
+-O Sistema tem Organizações, que têm Workspaces, que têm Usuários (profiles), que têm Chats, que têm Artefatos. 
+-As Workspaces também têm Companions, que têm acesso concedido para o(s) Usuário(s).
+-Inicialmente são criadas duas Workspace padrão: uma pessoal para o Usuário (MyWorkspace - privada) e uma para funcional para Organização (OrgWorkspace - pública).
+-Todo novo usuario recebe um Super Companion no MyWorkspace e o acesso ao seu próprio Workspace. 
+-O OrgAdmin tem acesso a todos Workspaces, e pode dar acesso ao OrgWorkspace para WspManagers, ou criar novos Workspaces funcionais.
+-Os WorkspaceManagers podem criar Companions Funcionais, e conceder acesso à eles para os Usuários.
+-Os Usuários podem usar e editar o SuperCompanion, mas só usar os Companions Funcionais que receberem acesso (quem edita é o WspManager).
+-Os Companions são 'agentes' com instruções/conhecimento próprio e podem ser acionados no Chat do usuário, e podem ter Skills pré-definidas. 
+-As Skills funcionam como 'sub-agentes' dos Companions com propósito mais específico, também podem ter instruções/conhecimento próprio, e podem ter Steps pré-definidas.
+-As Steps funcionam como 'execuções/fases' individuais, e também podem ter instruções/conhecimento próprio.
+-O conjunto de Steps funcionam como workflows agenticos....ver docs anthropic
+
+---ORGANIZATIONS---
+-Campos Header: ORGANIZATION_ID (PK), ORGANIZATION_NAME (UNIQUE), ORGANIZATION_CREATED_AT, ORGANIZATION_UPDATED_AT
+-Campos JSONB: ORGANIZATION_ATTRIBUTES {description, createdBy, inviteCode, tenantConfig, structure {teams, positions}, culture {values}}
+-Índices: idx_orgs_name (UNIQUE), idx_orgs_created (DESC), idx_orgs_attributes_gin (GIN), idx_orgs_invite_code (B-tree em JSONB)
+-Redução: 11 campos → 5 campos (55%)
+
+---USERS---
+-Campos Header: USER_ID (PK), USER_EMAIL (UNIQUE), USER_NAME, ORGANIZATION_ID (FK), USER_ROLE_CODE (ENUM: MS, OA, WM, UR), USER_INVITE_CODE, USER_CREATED_AT, USER_UPDATED_AT
+-Campos JSONB: USER_ATTRIBUTES {profile, auth {password, ssoEnabled, lastLogin}, subscription, preferences, onboarding, stats, notifications}
+-RBAC: MS=MasterSys (1%), OA=OrgAdmin (5%), WM=WorkspaceManager (15%), UR=User (79%)
+-Índices: idx_users_email (UNIQUE), idx_users_org, idx_users_role, idx_users_invite
+-Redução: 16 campos → 9 campos (44%)
+
+---PERMISSIONS_ACL---
+-Campos Header: PERMISSION_ID (PK), ORGANIZATION_ID (FK), PERMISSION_ENTITY_CODE (ENUM), PERMISSION_ENTITY_PK_ID, PERMISSION_ACTION (ENUM), CREATED_BY_USER_ID (FK), CREATED_FOR_USER_ID (FK), PERMISSION_CREATED_AT, PERMISSION_VALID_FROM, PERMISSION_VALID_TO, PERMISSION_REVOKED_AT
+-ENUMs: ENTITY_CODE (ORG, WSP, CMP, PRL, CHT, KNW, TOL), ACTION (REA, WRI, UPD, CRU, MNG)
+-Índices: idx_permissions_org, idx_permissions_entity, idx_permissions_user_for, idx_permissions_active (partial)
+-Uso: Controle de acesso granular via RLS. Campos temporais para permissões com validade temporal
+
+---WORKSPACES---
+-Campos Header: WORKSPACE_KIND ('PER', 'ORG', 'WSP')
+-Usuário só pode ter uma Workspace pessoal e estar em uma Workspace Organizacional
+-Usuário pode estar em varios Workspaces funcionais
+
+---CONHECIMENTO---
+-O Conhecimento está presente em vários níveis: Organização, Workspaces, Profiles (usuários), Companions, Skills, Steps
+-O Conhecimento são arquivos carregados ou lidos em drives ou endereços web ou integrações com banco de dados ou tools mcp.
+-O Conhecimento é indexido via AutoRAG na tabela CONHECIMENTO_RAG (conforme PGVector)
+-O AutoRAG indexa também Artefatos e Chats do Usuário automaticamente.
+-Campos header: entity_code, entity_pk_id, CLASS_INFO (PUB, ORG, WSP, PVT), RESTRICTS_STAMPS (PII, FIN, COF) 
+
+
+---FERRAMENTAS_MCP---
+-Master configura e dá acesso ao OrgAdmin, que dá acesso da config à Users, que configuram com Bearer ou OAuth, quando há
+
+---PERMISSOES_ACL---
+-Campos header: entity_code, entity_pk_id, CREATED_BY, CREATED_FOR, CREATED_AT, VALID_FROM, VALID_TO
+
+---OBSERVACOES---
+-Todo Artefato é salva automaticamente na Workspace do usuario. Usuário pode escolher salvar Artefatos também em outras Workspaces para compartilhar. 
+-Arfefatos por padrão serão gerados com Markdown + SVG e exportados para PDF.
+-Chats permitem injeção de conhecimento, ferramentas, uploads, links, arquivos e imagens/capturas.
+-A relação entre Workspaces e Companions vai refletir AI Organograma.
+-Por enquanto para um usuario editar um Companion Funcionais precisa ser WspManager, mas o modelo permite conceder acesso leitura/escrita por Companion.
+-Falar sobre Usuario sem convite vs Usuario 
+com convite...
+
+---FUTURO---
+Memória dinâmica
+Flow multi-agentes 
+Tabela Audit_Log com triggers direto no BD.
+
+---RESUMO ROLES---
+MasterSys->Cria Organizações e dá acesso ao(s) OrgAdmin(s).
+OrgAdmin->Cria Workspaces da organização e dá acesso ao(s) WspManager(s).
+WspManager->Cria Companions funcionais e dá acesso ao(s) Usuário(s).
+User->Usa o seu SuperCompanion e os CompanionsFuncionais que tiver acesso
+
+---RESUMO CONFIG ORGANIZAÇÃO/OMBOARDING MANUAL---
+-A humana pré cadastra uma nova Organização, o sistema cria o Workspace Organizacional, com o Usuario administrador da Organização.
+-OrgAdmin envia os convites para os Usuários da Organização, todo novo Usuario é atribuido ao Workspace organizacional e recebe o Workspace Pessoal
+
+---RESUMO PERMISSOES--- 
+GUC->RLS->ACL->RAG
+
+---SuperCompanion---
+-Template Schema com Skills genéricas 
+
+====EXEMPLO DE SCHEMAS_JSONB (ATRIBUTOS_SKILL)====
+
+{
+  "name": "criar_perfil_funcionario",
+  "goal": "Criar perfil completo de funcionário nos sistemas da Belgo",
+  "data": {
+    "organizacao": "Estruturas organizacionais Belgo, hierarquias, códigos",
+    "candidato": "Dados do processo seletivo + documentos validados",
+    "sistemas": "Odoo (RH), SAP (Folha), Email (Comunicação)"
+  },
+  "steps": [
+    "1) Estruture dados organizacionais (departamento, cargo, hierarquia)",
+    "2) Aplique códigos e classificações do sistema",
+    "3) Configure acessos iniciais baseados no cargo",
+    "4) Valide integrações com sistemas externos"
+  ],
+  "rules": [
+    "Seguir estrutura organizacional da Belgo",
+    "Aplicar políticas de acesso por cargo",
+    "Validar dados antes de sincronizar",
+    "Manter auditoria completa de criação"
+  ],
+
+  "tools": [
+    "odoo_create_employee",
+    "sap_sync_data",
+    "email_send_welcome"
+  ],
+  "user_inputs": {},
+  "user_interactions": {},
+  "metadata": {
+    "schema_name": "atributos_skills",
+    "schema_version": "1.0"
+  }
+}

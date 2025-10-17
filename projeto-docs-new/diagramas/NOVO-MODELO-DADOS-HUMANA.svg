@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1800" width="2400" height="1800">
+  <defs>
+    <style>
+      .table-box { fill: #ffffff; stroke: #2c3e50; stroke-width: 2; rx: 8; }
+      .table-header { fill: #3498db; stroke: none; rx: 8; }
+      .table-title { fill: #ffffff; font-family: 'Arial', sans-serif; font-size: 16px; font-weight: bold; }
+      .table-field { fill: #2c3e50; font-family: 'Courier New', monospace; font-size: 13px; }
+      .table-pk { fill: #e74c3c; font-weight: bold; }
+      .table-fk { fill: #16a085; }
+      .relationship { stroke: #7f8c8d; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .relationship-label { fill: #7f8c8d; font-family: 'Arial', sans-serif; font-size: 11px; font-style: italic; }
+      .enum-box { fill: #ecf0f1; stroke: #95a5a6; stroke-width: 2; rx: 6; }
+      .enum-header { fill: #95a5a6; stroke: none; rx: 6; }
+      .enum-title { fill: #ffffff; font-family: 'Arial', sans-serif; font-size: 14px; font-weight: bold; }
+      .enum-value { fill: #34495e; font-family: 'Courier New', monospace; font-size: 12px; }
+      .central-box { fill: #fff3cd; stroke: #f39c12; stroke-width: 3; rx: 8; }
+      .central-header { fill: #f39c12; stroke: none; rx: 8; }
+      .section-title { fill: #2c3e50; font-family: 'Arial', sans-serif; font-size: 20px; font-weight: bold; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#7f8c8d" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="1200" y="40" text-anchor="middle" class="section-title" style="font-size: 28px; fill: #2c3e50;">
+    🏢 MODELO DE DADOS - PLATAFORMA HUMANA COMPANIONS
+  </text>
+
+  <!-- ==================== CORE ENTITIES ==================== -->
+  
+  <!-- ORGANIZATIONS -->
+  <g id="organizations">
+    <rect class="table-box" x="50" y="80" width="280" height="200"/>
+    <rect class="table-header" x="50" y="80" width="280" height="35"/>
+    <text x="190" y="103" text-anchor="middle" class="table-title">ORGANIZATIONS</text>
+    <text x="65" y="135" class="table-field table-pk">• id UUID PK</text>
+    <text x="65" y="155" class="table-field">• name VARCHAR(255)</text>
+    <text x="65" y="175" class="table-field">• invite_code VARCHAR(20) UNIQUE</text>
+    <text x="65" y="195" class="table-field">• created_at TIMESTAMP</text>
+    <text x="65" y="215" class="table-field">• updated_at TIMESTAMP</text>
+    <text x="65" y="235" class="table-field">• is_active BOOLEAN</text>
+    <text x="65" y="255" class="table-field">• attributes JSONB</text>
+  </g>
+
+  <!-- WORKSPACES -->
+  <g id="workspaces">
+    <rect class="table-box" x="450" y="80" width="320" height="240"/>
+    <rect class="table-header" x="450" y="80" width="320" height="35"/>
+    <text x="610" y="103" text-anchor="middle" class="table-title">WORKSPACES</text>
+    <text x="465" y="135" class="table-field table-pk">• id UUID PK</text>
+    <text x="465" y="155" class="table-field table-fk">• organization_id UUID FK</text>
+    <text x="465" y="175" class="table-field">• name VARCHAR(255)</text>
+    <text x="465" y="195" class="table-field">• workspace_type ENUM</text>
+    <text x="465" y="215" class="table-field">  (PERSONAL, FUNCTIONAL)</text>
+    <text x="465" y="235" class="table-field">• is_default BOOLEAN</text>
+    <text x="465" y="255" class="table-field">• created_at TIMESTAMP</text>
+    <text x="465" y="275" class="table-field">• updated_at TIMESTAMP</text>
+    <text x="465" y="295" class="table-field">• attributes JSONB</text>
+  </g>
+
+  <!-- USERS (PROFILES) -->
+  <g id="users">
+    <rect class="table-box" x="890" y="80" width="320" height="240"/>
+    <rect class="table-header" x="890" y="80" width="320" height="35"/>
+    <text x="1050" y="103" text-anchor="middle" class="table-title">USERS (PROFILES)</text>
+    <text x="905" y="135" class="table-field table-pk">• id UUID PK</text>
+    <text x="905" y="155" class="table-field table-fk">• organization_id UUID FK</text>
+    <text x="905" y="175" class="table-field">• email VARCHAR(255) UNIQUE</text>
+    <text x="905" y="195" class="table-field">• name VARCHAR(255)</text>
+    <text x="905" y="215" class="table-field">• role_code ENUM</text>
+    <text x="905" y="235" class="table-field">  (MS, OA, WM, UR)</text>
+    <text x="905" y="255" class="table-field">• created_at TIMESTAMP</text>
+    <text x="905" y="275" class="table-field">• updated_at TIMESTAMP</text>
+    <text x="905" y="295" class="table-field">• attributes JSONB</text>
+  </g>
+
+  <!-- CHATS -->
+  <g id="chats">
+    <rect class="table-box" x="1320" y="80" width="320" height="240"/>
+    <rect class="table-header" x="1320" y="80" width="320" height="35"/>
+    <text x="1480" y="103" text-anchor="middle" class="table-title">CHATS</text>
+    <text x="1335" y="135" class="table-field table-pk">• id UUID PK</text>
+    <text x="1335" y="155" class="table-field table-fk">• user_id UUID FK</text>
+    <text x="1335" y="175" class="table-field table-fk">• workspace_id UUID FK</text>
+    <text x="1335" y="195" class="table-field table-fk">• companion_id UUID FK</text>
+    <text x="1335" y="215" class="table-field">• title VARCHAR(255)</text>
+    <text x="1335" y="235" class="table-field">• messages JSONB[]</text>
+    <text x="1335" y="255" class="table-field">• created_at TIMESTAMP</text>
+    <text x="1335" y="275" class="table-field">• updated_at TIMESTAMP</text>
+    <text x="1335" y="295" class="table-field">• attributes JSONB</text>
+  </g>
+
+  <!-- ARTIFACTS -->
+  <g id="artifacts">
+    <rect class="table-box" x="1750" y="80" width="320" height="220"/>
+    <rect class="table-header" x="1750" y="80" width="320" height="35"/>
+    <text x="1910" y="103" text-anchor="middle" class="table-title">ARTIFACTS</text>
+    <text x="1765" y="135" class="table-field table-pk">• id UUID PK</text>
+    <text x="1765" y="155" class="table-field table-fk">• chat_id UUID FK (NULLABLE)</text>
+    <text x="1765" y="175" class="table-field table-fk">• workspace_id UUID FK</text>
+    <text x="1765" y="195" class="table-field">• name VARCHAR(255)</text>
+    <text x="1765" y="215" class="table-field">• content BYTEA</text>
+    <text x="1765" y="235" class="table-field">• format VARCHAR(10)</text>
+    <text x="1765" y="255" class="table-field">• status ENUM (ACT, ARC, DEL)</text>
+    <text x="1765" y="275" class="table-field">• created_at TIMESTAMP</text>
+  </g>
+
+  <!-- ==================== AI ENTITIES ==================== -->
+
+  <!-- COMPANIONS -->
+  <g id="companions">
+    <rect class="table-box" x="50" y="400" width="320" height="280"/>
+    <rect class="table-header" x="50" y="400" width="320" height="35"/>
+    <text x="210" y="423" text-anchor="middle" class="table-title">COMPANIONS</text>
+    <text x="65" y="455" class="table-field table-pk">• id UUID PK</text>
+    <text x="65" y="475" class="table-field table-fk">• workspace_id UUID FK</text>
+    <text x="65" y="495" class="table-field table-fk">• organization_id UUID FK</text>
+    <text x="65" y="515" class="table-field table-fk">• created_by_user_id UUID FK</text>
+    <text x="65" y="535" class="table-field">• name VARCHAR(255)</text>
+    <text x="65" y="555" class="table-field">• companion_type ENUM</text>
+    <text x="65" y="575" class="table-field">  (SUPER, FUNCTIONAL)</text>
+    <text x="65" y="595" class="table-field">• instructions TEXT</text>
+    <text x="65" y="615" class="table-field">• is_active BOOLEAN</text>
+    <text x="65" y="635" class="table-field">• created_at TIMESTAMP</text>
+    <text x="65" y="655" class="table-field">• attributes JSONB</text>
+  </g>
+
+  <!-- SKILLS -->
+  <g id="skills">
+    <rect class="table-box" x="450" y="400" width="320" height="260"/>
+    <rect class="table-header" x="450" y="400" width="320" height="35"/>
+    <text x="610" y="423" text-anchor="middle" class="table-title">SKILLS</text>
+    <text x="465" y="455" class="table-field table-pk">• id UUID PK</text>
+    <text x="465" y="475" class="table-field table-fk">• companion_id UUID FK</text>
+    <text x="465" y="495" class="table-field">• name VARCHAR(255)</text>
+    <text x="465" y="515" class="table-field">• goal TEXT</text>
+    <text x="465" y="535" class="table-field">• instructions TEXT</text>
+    <text x="465" y="555" class="table-field">• execution_order INTEGER</text>
+    <text x="465" y="575" class="table-field">• is_active BOOLEAN</text>
+    <text x="465" y="595" class="table-field">• created_at TIMESTAMP</text>
+    <text x="465" y="615" class="table-field">• updated_at TIMESTAMP</text>
+    <text x="465" y="635" class="table-field">• attributes JSONB</text>
+  </g>
+
+  <!-- STEPS -->
+  <g id="steps">
+    <rect class="table-box" x="890" y="400" width="320" height="260"/>
+    <rect class="table-header" x="890" y="400" width="320" height="35"/>
+    <text x="1050" y="423" text-anchor="middle" class="table-title">STEPS</text>
+    <text x="905" y="455" class="table-field table-pk">• id UUID PK</text>
+    <text x="905" y="475" class="table-field table-fk">• skill_id UUID FK</text>
+    <text x="905" y="495" class="table-field">• name VARCHAR(255)</text>
+    <text x="905" y="515" class="table-field">• description TEXT</text>
+    <text x="905" y="535" class="table-field">• instructions TEXT</text>
+    <text x="905" y="555" class="table-field">• step_order INTEGER</text>
+    <text x="905" y="575" class="table-field">• is_active BOOLEAN</text>
+    <text x="905" y="595" class="table-field">• created_at TIMESTAMP</text>
+    <text x="905" y="615" class="table-field">• updated_at TIMESTAMP</text>
+    <text x="905" y="635" class="table-field">• attributes JSONB</text>
+  </g>
+
+  <!-- EXECUTIONS -->
+  <g id="executions">
+    <rect class="table-box" x="1320" y="400" width="320" height="280"/>
+    <rect class="table-header" x="1320" y="400" width="320" height="35"/>
+    <text x="1480" y="423" text-anchor="middle" class="table-title">EXECUTIONS</text>
+    <text x="1335" y="455" class="table-field table-pk">• id UUID PK</text>
+    <text x="1335" y="475" class="table-field table-fk">• chat_id UUID FK</text>
+    <text x="1335" y="495" class="table-field table-fk">• skill_id UUID FK</text>
+    <text x="1335" y="515" class="table-field table-fk">• user_id UUID FK</text>
+    <text x="1335" y="535" class="table-field">• status ENUM</text>
+    <text x="1335" y="555" class="table-field">  (PENDING, RUNNING,</text>
+    <text x="1335" y="575" class="table-field">   COMPLETED, FAILED)</text>
+    <text x="1335" y="595" class="table-field">• steps_log JSONB[]</text>
+    <text x="1335" y="615" class="table-field">• started_at TIMESTAMP</text>
+    <text x="1335" y="635" class="table-field">• completed_at TIMESTAMP</text>
+    <text x="1335" y="655" class="table-field">• attributes JSONB</text>
+  </g>
+
+  <!-- ==================== CENTRAL/SHARED TABLES ==================== -->
+
+  <!-- KNOWLEDGE_RAG (Central) -->
+  <g id="knowledge_rag">
+    <rect class="central-box" x="50" y="780" width="420" height="340"/>
+    <rect class="central-header" x="50" y="780" width="420" height="35"/>
+    <text x="260" y="803" text-anchor="middle" class="table-title">KNOWLEDGE_RAG (pgvector)</text>
+    <text x="65" y="835" class="table-field table-pk">• id UUID PK</text>
+    <text x="65" y="855" class="table-field">• resource_kind ENUM</text>
+    <text x="65" y="875" class="table-field">  (ORG, WSP, CMP, PRL, CHT, KNW, TOL)</text>
+    <text x="65" y="895" class="table-field">• resource_id UUID</text>
+    <text x="65" y="915" class="table-field">• class_info ENUM</text>
+    <text x="65" y="935" class="table-field">  (PUB, ORG, WSP, PVT)</text>
+    <text x="65" y="955" class="table-field">• restricts_stamps TEXT[]</text>
+    <text x="65" y="975" class="table-field">  (PII, FIN, COF)</text>
+    <text x="65" y="995" class="table-field">• content TEXT</text>
+    <text x="65" y="1015" class="table-field">• embedding VECTOR(1536)</text>
+    <text x="65" y="1035" class="table-field">• chunk_index INTEGER</text>
+    <text x="65" y="1055" class="table-field">• source_file VARCHAR(500)</text>
+    <text x="65" y="1075" class="table-field">• created_at TIMESTAMP</text>
+    <text x="65" y="1095" class="table-field">• attributes JSONB</text>
+  </g>
+
+  <!-- TOOLS_MCP -->
+  <g id="tools_mcp">
+    <rect class="table-box" x="570" y="780" width="380" height="280"/>
+    <rect class="table-header" x="570" y="780" width="380" height="35"/>
+    <text x="760" y="803" text-anchor="middle" class="table-title">TOOLS_MCP</text>
+    <text x="585" y="835" class="table-field table-pk">• id UUID PK</text>
+    <text x="585" y="855" class="table-field table-fk">• organization_id UUID FK</text>
+    <text x="585" y="875" class="table-field table-fk">• configured_by_user_id UUID FK</text>
+    <text x="585" y="895" class="table-field">• tool_name VARCHAR(255)</text>
+    <text x="585" y="915" class="table-field">• tool_type ENUM</text>
+    <text x="585" y="935" class="table-field">  (DATABASE, API, FILESYSTEM, CUSTOM)</text>
+    <text x="585" y="955" class="table-field">• auth_type ENUM (BEARER, OAUTH, NONE)</text>
+    <text x="585" y="975" class="table-field">• config_data JSONB</text>
+    <text x="585" y="995" class="table-field">• is_active BOOLEAN</text>
+    <text x="585" y="1015" class="table-field">• created_at TIMESTAMP</text>
+    <text x="585" y="1035" class="table-field">• attributes JSONB</text>
+  </g>
+
+  <!-- PERMISSIONS_ACL -->
+  <g id="permissions_acl">
+    <rect class="table-box" x="1040" y="780" width="380" height="300"/>
+    <rect class="table-header" x="1040" y="780" width="380" height="35"/>
+    <text x="1230" y="803" text-anchor="middle" class="table-title">PERMISSIONS_ACL</text>
+    <text x="1055" y="835" class="table-field table-pk">• id UUID PK</text>
+    <text x="1055" y="855" class="table-field table-fk">• organization_id UUID FK</text>
+    <text x="1055" y="875" class="table-field">• entity_code ENUM</text>
+    <text x="1055" y="895" class="table-field">  (ORG, WSP, CMP, PRL, CHT, KNW, TOL)</text>
+    <text x="1055" y="915" class="table-field">• entity_pk_id UUID</text>
+    <text x="1055" y="935" class="table-field">• action ENUM</text>
+    <text x="1055" y="955" class="table-field">  (REA, WRI, UPD, CRU, MNG)</text>
+    <text x="1055" y="975" class="table-field table-fk">• created_by_user_id UUID FK</text>
+    <text x="1055" y="995" class="table-field table-fk">• created_for_user_id UUID FK</text>
+    <text x="1055" y="1015" class="table-field">• created_at TIMESTAMP</text>
+    <text x="1055" y="1035" class="table-field">• valid_from TIMESTAMP</text>
+    <text x="1055" y="1055" class="table-field">• valid_to / revoked_at TIMESTAMP</text>
+  </g>
+
+  <!-- WORKSPACE_USERS (Junction) -->
+  <g id="workspace_users">
+    <rect class="table-box" x="1510" y="780" width="320" height="200"/>
+    <rect class="table-header" x="1510" y="780" width="320" height="35"/>
+    <text x="1670" y="803" text-anchor="middle" class="table-title">WORKSPACE_USERS</text>
+    <text x="1525" y="835" class="table-field table-pk">• id UUID PK</text>
+    <text x="1525" y="855" class="table-field table-fk">• workspace_id UUID FK</text>
+    <text x="1525" y="875" class="table-field table-fk">• user_id UUID FK</text>
+    <text x="1525" y="895" class="table-field table-fk">• granted_by_user_id UUID FK</text>
+    <text x="1525" y="915" class="table-field">• access_granted_at TIMESTAMP</text>
+    <text x="1525" y="935" class="table-field">• is_active BOOLEAN</text>
+    <text x="1525" y="955" class="table-field">• attributes JSONB</text>
+  </g>
+
+  <!-- ==================== ENUMS SECTION ==================== -->
+  <text x="1200" y="1180" text-anchor="middle" class="section-title">📋 ENUMERATIONS (Padrão: 3 letras)</text>
+
+  <!-- ROLE_CODES -->
+  <g id="enum_roles">
+    <rect class="enum-box" x="50" y="1210" width="280" height="180"/>
+    <rect class="enum-header" x="50" y="1210" width="280" height="30"/>
+    <text x="190" y="1230" text-anchor="middle" class="enum-title">ROLE_CODES</text>
+    <text x="65" y="1260" class="enum-value">• MS - MasterSys</text>
+    <text x="65" y="1280" class="enum-value">• OA - OrgAdmin</text>
+    <text x="65" y="1300" class="enum-value">• WM - WorkspaceManager</text>
+    <text x="65" y="1320" class="enum-value">• UR - User</text>
+    <text x="65" y="1360" class="enum-value" style="font-size: 10px; font-style: italic;">Define acesso funcional</text>
+  </g>
+
+  <!-- RESOURCE_KIND -->
+  <g id="enum_resources">
+    <rect class="enum-box" x="370" y="1210" width="280" height="220"/>
+    <rect class="enum-header" x="370" y="1210" width="280" height="30"/>
+    <text x="510" y="1230" text-anchor="middle" class="enum-title">RESOURCE_KIND</text>
+    <text x="385" y="1260" class="enum-value">• ORG - Organization</text>
+    <text x="385" y="1280" class="enum-value">• WSP - Workspace</text>
+    <text x="385" y="1300" class="enum-value">• CMP - Companion</text>
+    <text x="385" y="1320" class="enum-value">• PRL - Profile (User)</text>
+    <text x="385" y="1340" class="enum-value">• CHT - Chat</text>
+    <text x="385" y="1360" class="enum-value">• KNW - Knowledge</text>
+    <text x="385" y="1380" class="enum-value">• TOL - Tool</text>
+    <text x="385" y="1410" class="enum-value" style="font-size: 10px; font-style: italic;">Tipo de recurso no sistema</text>
+  </g>
+
+  <!-- ACTION -->
+  <g id="enum_actions">
+    <rect class="enum-box" x="690" y="1210" width="280" height="200"/>
+    <rect class="enum-header" x="690" y="1210" width="280" height="30"/>
+    <text x="830" y="1230" text-anchor="middle" class="enum-title">ACTION</text>
+    <text x="705" y="1260" class="enum-value">• REA - Read</text>
+    <text x="705" y="1280" class="enum-value">• WRI - Write</text>
+    <text x="705" y="1300" class="enum-value">• UPD - Update</text>
+    <text x="705" y="1320" class="enum-value">• CRU - Create</text>
+    <text x="705" y="1340" class="enum-value">• MNG - Manage</text>
+    <text x="705" y="1380" class="enum-value" style="font-size: 10px; font-style: italic;">Ações de permissão (3 letras)</text>
+  </g>
+
+  <!-- CLASS_INFO -->
+  <g id="enum_class">
+    <rect class="enum-box" x="1010" y="1210" width="280" height="180"/>
+    <rect class="enum-header" x="1010" y="1210" width="280" height="30"/>
+    <text x="1150" y="1230" text-anchor="middle" class="enum-title">CLASS_INFO</text>
+    <text x="1025" y="1260" class="enum-value">• PUB - Public</text>
+    <text x="1025" y="1280" class="enum-value">• ORG - Organization</text>
+    <text x="1025" y="1300" class="enum-value">• WSP - Workspace</text>
+    <text x="1025" y="1320" class="enum-value">• PVT - Private</text>
+    <text x="1025" y="1360" class="enum-value" style="font-size: 10px; font-style: italic;">Nível de acesso</text>
+  </g>
+
+  <!-- RESTRICTS_STAMPS -->
+  <g id="enum_restricts">
+    <rect class="enum-box" x="1330" y="1210" width="280" height="160"/>
+    <rect class="enum-header" x="1330" y="1210" width="280" height="30"/>
+    <text x="1470" y="1230" text-anchor="middle" class="enum-title">RESTRICTS_STAMPS</text>
+    <text x="1345" y="1260" class="enum-value">• PII - Personal Info</text>
+    <text x="1345" y="1280" class="enum-value">• FIN - Financial</text>
+    <text x="1345" y="1300" class="enum-value">• COF - Confidential</text>
+    <text x="1345" y="1340" class="enum-value" style="font-size: 10px; font-style: italic;">Classificação de dados</text>
+  </g>
+
+  <!-- ==================== RELATIONSHIPS ==================== -->
+  
+  <!-- Organizations → Workspaces -->
+  <path class="relationship" d="M 330 170 L 450 170"/>
+  <text x="390" y="165" class="relationship-label">1:N</text>
+
+  <!-- Workspaces → Users -->
+  <path class="relationship" d="M 770 170 L 890 170"/>
+  <text x="830" y="165" class="relationship-label">N:M</text>
+
+  <!-- Users → Chats -->
+  <path class="relationship" d="M 1210 170 L 1320 170"/>
+  <text x="1265" y="165" class="relationship-label">1:N</text>
+
+  <!-- Chats → Artifacts -->
+  <path class="relationship" d="M 1640 170 L 1750 170"/>
+  <text x="1695" y="165" class="relationship-label">1:N</text>
+
+  <!-- Organizations → Companions -->
+  <path class="relationship" d="M 190 260 L 190 400"/>
+  <text x="200" y="330" class="relationship-label">1:N</text>
+
+  <!-- Workspaces → Companions -->
+  <path class="relationship" d="M 450 200 L 350 200 L 350 490 L 370 490"/>
+  <text x="360" y="350" class="relationship-label">1:N</text>
+
+  <!-- Companions → Skills -->
+  <path class="relationship" d="M 370 520 L 450 520"/>
+  <text x="410" y="515" class="relationship-label">1:N</text>
+
+  <!-- Skills → Steps -->
+  <path class="relationship" d="M 770 520 L 890 520"/>
+  <text x="830" y="515" class="relationship-label">1:N</text>
+
+  <!-- Chats → Executions -->
+  <path class="relationship" d="M 1480 320 L 1480 400"/>
+  <text x="1490" y="360" class="relationship-label">1:N</text>
+
+  <!-- Skills → Executions -->
+  <path class="relationship" d="M 770 550 L 1320 550"/>
+  <text x="1045" y="545" class="relationship-label">1:N</text>
+
+  <!-- Organizations → Knowledge_RAG -->
+  <path class="relationship" d="M 190 260 L 190 780"/>
+  <text x="200" y="520" class="relationship-label">1:N</text>
+
+  <!-- Workspaces → Knowledge_RAG -->
+  <path class="relationship" d="M 610 320 L 610 750 L 260 750 L 260 780"/>
+  <text x="620" y="550" class="relationship-label">1:N</text>
+
+  <!-- Companions → Knowledge_RAG -->
+  <path class="relationship" d="M 50 540 L 30 540 L 30 950 L 50 950"/>
+  <text x="35" y="745" class="relationship-label">1:N</text>
+
+  <!-- Organizations → Tools_MCP -->
+  <path class="relationship" d="M 190 260 L 190 700 L 760 700 L 760 780"/>
+  <text x="475" y="695" class="relationship-label">1:N</text>
+
+  <!-- Users → Permissions_ACL -->
+  <path class="relationship" d="M 1050 340 L 1050 720 L 1230 720 L 1230 780"/>
+  <text x="1140" y="715" class="relationship-label">1:N</text>
+
+  <!-- Workspaces ↔ Users (via Workspace_Users) -->
+  <path class="relationship" d="M 770 260 L 1670 260 L 1670 780"/>
+  <text x="1270" y="520" class="relationship-label">N:M junction</text>
+
+  <!-- Legend/Notes -->
+  <g id="legend">
+    <rect x="50" y="1460" width="2000" height="280" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2" rx="8"/>
+    <text x="1050" y="1490" text-anchor="middle" class="section-title" style="font-size: 18px;">📝 NOTAS DO MODELO</text>
+    
+    <text x="70" y="1520" class="table-field" style="font-size: 13px; font-weight: bold;">🔒 SEGURANÇA E ISOLAMENTO:</text>
+    <text x="70" y="1545" class="table-field" style="font-size: 12px;">• GUC (SET LOCAL) define contexto: organization_id, workspace_id, role_code, user_id</text>
+    <text x="70" y="1565" class="table-field" style="font-size: 12px;">• RLS (Row Level Security) aplicado em TODAS as tabelas baseado em GUC</text>
+    <text x="70" y="1585" class="table-field" style="font-size: 12px;">• ACL (PERMISSIONS_ACL) controla acesso granular a recursos específicos</text>
+    <text x="70" y="1605" class="table-field" style="font-size: 12px;">• RAG (KNOWLEDGE_RAG) filtra conhecimento por class_info e restricts_stamps</text>
+    
+    <text x="70" y="1635" class="table-field" style="font-size: 13px; font-weight: bold;">🎯 WORKSPACES PADRÃO:</text>
+    <text x="70" y="1660" class="table-field" style="font-size: 12px;">• MyWorkspace (PERSONAL) - criado automaticamente para cada usuário, privado</text>
+    <text x="70" y="1680" class="table-field" style="font-size: 12px;">• OrgWorkspace (FUNCTIONAL) - criado para organização, público para membros</text>
+    
+    <text x="1100" y="1520" class="table-field" style="font-size: 13px; font-weight: bold;">🤖 HIERARQUIA AGÊNTICA:</text>
+    <text x="1100" y="1545" class="table-field" style="font-size: 12px;">• COMPANIONS = Agentes principais (Super ou Funcionais)</text>
+    <text x="1100" y="1565" class="table-field" style="font-size: 12px;">• SKILLS = Sub-agentes com propósito específico</text>
+    <text x="1100" y="1585" class="table-field" style="font-size: 12px;">• STEPS = Fases individuais de execução</text>
+    <text x="1100" y="1605" class="table-field" style="font-size: 12px;">• EXECUTIONS = Workflows agênticos (logs de execução)</text>
+    
+    <text x="1100" y="1635" class="table-field" style="font-size: 13px; font-weight: bold;">📊 ATRIBUTOS JSONB:</text>
+    <text x="1100" y="1660" class="table-field" style="font-size: 12px;">• Cada tabela tem campo 'attributes' JSONB para extensibilidade</text>
+    <text x="1100" y="1680" class="table-field" style="font-size: 12px;">• Schemas validados por jsonschema (ver exemplo em Definicoes_Edu.txt)</text>
+    <text x="1100" y="1700" class="table-field" style="font-size: 12px;">• Permite evolução sem alteração de schema físico</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="1200" y="1770" text-anchor="middle" style="fill: #95a5a6; font-family: 'Arial', sans-serif; font-size: 11px;">
+    Modelo de Dados Humana Companions v2.0 (Atualizado) - 2025-01-15 - Arquitetura Multi-Tenant com RLS+GUC+ACL
+  </text>
+  <text x="1200" y="1790" text-anchor="middle" style="fill: #95a5a6; font-family: 'Arial', sans-serif; font-size: 10px;">
+    Mudanças: invite_code em ORGANIZATIONS | ARTIFACTS simplificado (BYTEA, sem JSONB) | PERMISSIONS_ACL com organization_id | ENUMs 3 letras
+  </text>
+</svg>

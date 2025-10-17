@@ -1,0 +1,551 @@
+====DEFINICOES GERAIS====
+-Este documento define as convenções e padrões para a estrutura de código IDEAL do projeto.
+-O objetivo é garantir consistência, manutenibilidade e escalabilidade.
+-As definições são aplicáveis a todos os novos desenvolvimentos e refatorações.
+-Esta é a estrutura ALVO para a nova versão da plataforma.
+
+====⚠️ CONTEXTO DA MIGRAÇÃO - SEPARAÇÃO CRÍTICA====
+
+**🎨 FRONTEND (REORGANIZAÇÃO - NÃO É DO ZERO):**
+-V5 (atual) → V0 (reorganizar componentes, manter funcionalidades)
+-V1 (atual) → Remover após migração
+-Limpar dependências V1/shared
+-Reorganizar estrutura de pastas (/components/chat/ modular)
+-MANTER interface visual EXATAMENTE IGUAL (zero quebra para usuário)
+-MANTER todas as funcionalidades (chat, skills, multimodal, etc)
+-NÃO tocar em backend nessa etapa
+
+**🔧 BACKEND (DO ZERO TOTAL - RECONSTRUÇÃO COMPLETA):**
+-❌ REMOVER backend antigo completamente
+-✅ CRIAR banco de dados do zero (schema novo em /projeto-docs-new/tabelas/)
+-✅ CRIAR migrations novas (validação campo por campo)
+-✅ CRIAR API routes novas (app/api/v0/*)
+-✅ CRIAR queries novas (lib/db/queries.ts)
+-✅ CRIAR Server Actions novas
+-✅ VALIDAR TUDO contra Definicoes_banco_de_dados.txt
+-Backend novo será vendor-agnostic (sem SDKs cloud-specific)
+-Backend novo com RLS, ACL, GUC desde o início
+
+**🎯 RESULTADO PARA USUÁRIO:**
+-Interface IGUAL (zero mudanças visuais)
+-Funcionalidades IGUAIS (zero quebras)
+-Performance MELHOR (backend otimizado)
+-Arquitetura LIMPA (front organizado + back moderno)
+
+====ESTRUTURA DE PASTAS IDEAL====
+-A estrutura de pastas segue o padrão Next.js App Router.
+-Organização por funcionalidade e tipo de arquivo.
+
+/app                              # Rotas e layouts principais
+  /(auth)                         # Rotas de autenticação
+    /login
+    /signup
+  /(main)                         # Rotas principais da aplicação
+    /chat                         # Chat principal (migrado de v5)
+    /companions                   # Gerenciamento de companions
+    /dashboard                    # Visão geral e métricas
+    /settings                     # Configurações do usuário/organização
+    /workspaces                   # Gerenciamento de workspaces
+  /(public)                       # Rotas públicas
+    /login                        # Autenticação
+    /signup                       # Cadastro
+
+/components                       # Componentes React
+  /ui                            # shadcn/ui base components (Button, Card, Input, etc)
+  /chat                          # Sistema de chat principal (migrado e limpo de v5)
+    /core                        # Componentes core do chat
+      chat-container.tsx         # Container principal
+      chat-messages.tsx          # Renderização de mensagens
+      chat-input.tsx             # Input de mensagens
+      welcome-screen.tsx         # Tela inicial
+    /ai-elements                 # AI SDK Elements integrados
+      ai-sdk-elements-native.tsx # Componentes nativos AI SDK
+      chain-of-thought-demo.tsx  # Demo de CoT
+    /headers                     # Headers e navegação
+      chat-header.tsx            # Header principal
+      animated-header.tsx        # Header com animações
+    /skills                      # Sistema de skills
+      chat-skills-cards.tsx      # Cards de skills
+      companion-selector.tsx     # Seletor de companions
+    /multimodal                  # Input multimodal
+      multimodal-input.tsx       # Input com múltiplos formatos
+      preview-attachment.tsx     # Preview de anexos
+    /context                     # Gerenciamento de contexto
+      context-multi-selector.tsx # Seletor de contextos
+      mcp-multi-selector.tsx     # Seletor MCP
+    /ui                          # Componentes UI específicos do chat
+      icons.tsx                  # Ícones customizados
+      scroll-to-bottom-button.tsx
+      visibility-selector.tsx
+    /utils                       # Utilitários do chat
+      message-utils.ts           # Helpers de mensagens
+  /skill-engineering             # Engenharia de skills
+  /workers                       # Workers para processamento assíncrono
+  /workflows                     # Sistema de workflows
+  /ai-elements-official          # AI SDK Elements oficiais (Conversation, Message, etc)
+  /admin                         # Componentes de administração
+  /agentic-rag                   # RAG agentic
+  /auth                          # Autenticação
+  /debug                         # Ferramentas de debug
+  /personal-memory               # Memória pessoal
+  /providers                     # Providers (AI, etc)
+
+/lib                              # Lógica core e utilitários
+  /db                            # Database (Drizzle ORM)
+    schema.ts                    # Schema completo do banco (reconstruído)
+    queries.ts                   # Queries reutilizáveis centralizadas
+    migrations/                  # Migrações do novo banco
+  /ai                            # Configurações AI SDK
+    providers.ts                 # Providers configurados (myProvider com Azure)
+  /auth                          # NextAuth configuração e helpers
+  /actions                       # Server Actions organizadas por feature
+  utils.ts                       # Utilitários gerais (cn, formatters, validators)
+
+/hooks                            # Custom React Hooks
+  use-chat.ts                    # Hook principal de chat (AI SDK 5.0)
+  use-companion-*.ts             # Hooks de companions
+  use-organization-context.ts    # Hook de contexto organizacional
+
+/public                           # Assets estáticos (imagens, fontes)
+
+/scripts                          # Scripts de automação e manutenção
+
+/tests                            # Testes (unitários, integração, e2e)
+
+====LIMPEZA NECESSÁRIA====
+-REMOVER: /components/v1 (descontinuada)
+-REMOVER: /components/v2 (se existir, descontinuada)
+-REMOVER: /components/experimental (consolidar ou deletar)
+-REMOVER: /components/flow (consolidar em workflows)
+-REMOVER: /components/generative-ui (consolidar em chat core)
+-MOVER: /components/v5/* → /components/chat/* (estrutura reorganizada)
+-LIMPAR: 50+ componentes soltos na raiz de /components (organizar em subpastas)
+
+====CONVENÇÕES DE NOMENCLATURA====
+-Pastas: kebab-case (my-folder, user-settings)
+-Arquivos: kebab-case (my-component.tsx, use-auth.ts)
+-Componentes React: PascalCase (MyComponent, UserProfileCard)
+-Funções e variáveis: camelCase (formatDate, getUserProfile, isAuthenticated)
+-Constantes: UPPER_SNAKE_CASE (MAX_FILE_SIZE, DEFAULT_TIMEOUT, API_VERSION)
+-Types e Interfaces: PascalCase (ChatMessage, UserProfile, CompanionConfig)
+-Enums: PascalCase com valores UPPER (Role.ADMIN, Status.ACTIVE)
+
+====ORGANIZAÇÃO DE COMPONENTES====
+-Server Components: Padrão, sempre async quando busca dados do banco
+-Client Components: Apenas quando necessário interatividade, estado, eventos
+-Marcar Client Components explicitamente com 'use client' no topo do arquivo
+-Lógica complexa de Client Components deve estar em hooks customizados
+-Componentes devem ter máximo 300 linhas (quebrar em subcomponentes se maior)
+
+====COMPONENTES COMPARTILHADOS====
+-NÃO usar /shared entre versões (v1, v5, etc)
+-Cada sistema (chat, workflows, workers) tem seus próprios componentes organizados
+-Reutilização através de importação direta de pastas específicas
+-Componentes verdadeiramente compartilhados devem estar em /components/ui ou módulos específicos
+-PROBLEMA ATUAL: v5 importa de v1/shared (DEVE SER CORRIGIDO na migração)
+  * multimodal-input-v5.tsx importa: ContextMultiSelector, ArrowUpIcon, MCPMultiSelector, PreviewAttachment
+  * chat-v5-foundations.tsx importa: AnimatedHeader
+  * chat-header-v5.tsx importa: LoaderIcon
+  * chat-container-v1-layout.tsx importa: AnimatedHeader, ChatHeader
+  * workflow-execution-layout.tsx importa: StepProgress
+-SOLUÇÃO: Migrar esses componentes para a estrutura modular de /components/chat/
+
+====INTEGRAÇÃO COM BANCO DE DADOS====
+-Todas as queries centralizadas em lib/db/queries.ts
+-Usar Drizzle ORM (nunca SQL raw direto)
+-Sempre com tratamento de erro (try/catch)
+-Queries devem considerar organizationId e userId (context)
+-Server Actions para mutações (create, update, delete)
+-Validação de dados com Zod antes de salvar
+-Revalidação de cache após mutações (revalidatePath)
+-Implementar Row-Level Security (RLS) para controle de acesso a dados
+-Usar SET LOCAL para definir o Global User Context (GUC) no início de cada requisição
+-Backend será reconstruído: schema limpo, migrações novas, queries otimizadas
+
+====⚠️ VALIDAÇÃO CRÍTICA COM BANCO DE DADOS====
+**SEMPRE que criar/modificar backend (API routes, Server Actions, queries):**
+-✅ VALIDAR estrutura contra Definicoes_banco_de_dados.txt
+-✅ VERIFICAR se tabelas existem no schema documentado
+-✅ VERIFICAR se colunas correspondem ao schema
+-✅ VERIFICAR se relações (FKs) estão corretas
+-✅ VALIDAR se RLS está configurado (tabelas sensíveis)
+-✅ VALIDAR se tipos TypeScript correspondem ao InferSelectModel
+-✅ VALIDAR se organizationId e userId estão sendo passados (contexto)
+-❌ NUNCA criar queries sem consultar o schema documentado
+
+**Arquivo de referência obrigatório:** Definicoes_banco_de_dados.txt
+**Antes de qualquer mutation:** Validar com Zod usando schema documentado
+
+====AI SDK 5.0 - REGRAS OBRIGATÓRIAS====
+-SEMPRE usar myProvider (lib/ai/providers.ts) configurado com Azure
+-NUNCA criar providers customizados ou usar SDKs cloud-specific
+-SEMPRE usar AI SDK Elements oficiais (Conversation, Message, Response)
+-NUNCA implementar streaming ou tool calling manualmente
+-Usar useChat hook nativo para chat (nunca implementação custom)
+-System prompts via parameter 'system' do AI SDK
+-Conversão de mensagens via convertToModelMessages quando necessário
+-AI SDK é a base do sistema de chat
+-Utilizar AI SDK Elements para componentes de UI de chat
+-Implementar workers para processamento assíncrono de tarefas de IA
+
+====COMPONENTES CHAT V0 - O QUE MANTER E O QUE USAR NATIVO====
+**✅ MANTER DO V5 ATUAL:**
+-MultimodalInputV5: Input atual com anexos, contexto e MCP (components/v5/chat/multimodal-input-v5.tsx)
+-ChatHeaderV5: Header atual com companion selector e configurações (components/v5/chat/chat-header-v5.tsx)
+-Motivo: Já funcionam bem e têm todas as funcionalidades necessárias
+
+**✅ USAR 100% NATIVO AI SDK 5.0:**
+-Conversation: Container de mensagens (AI SDK Elements oficial)
+-Message: Renderização de cada mensagem (AI SDK Elements oficial)
+-Response: Resposta com streaming (AI SDK Elements oficial)
+-useChat: Hook de estado do chat (AI SDK hook nativo)
+-streamText: Streaming de respostas (AI SDK função nativa)
+-tools: Ferramentas/funções (AI SDK tools object nativo)
+
+**❌ NUNCA CRIAR CUSTOM:**
+-Implementações manuais de streaming de mensagens
+-Renderização custom de mensagens
+-Implementações manuais de tool calling
+-Input multimodal custom (usar o atual V5)
+-Header custom (usar o atual V5)
+
+====SISTEMA DE CONTEXTO====
+-OrganizationContext: Context global com organizationId e userId
+-Provider no root layout (app/layout.tsx)
+-Acesso via hook useOrganizationContext
+-NUNCA passar org/user via props quando context está disponível
+-Context usado para GUC (Global User Context) → RLS no banco
+-Garantir que todas as operações de dados respeitem o contexto da organização
+-Context deve ser injetado em todas as requisições via GUC
+
+====AUTENTICAÇÃO E AUTORIZAÇÃO====
+-NextAuth v5 configurado em lib/auth/config.ts
+-Session contém: userId, organizationId, role
+-Proteção de rotas via middleware.ts
+-Roles: MasterSys (MS), OrgAdmin (OA), WspManager (WM), User (UR)
+-Controle de acesso: Route Auth (telas) + RLS (dados) + ACL (recursos)
+-Fluxo completo: GUC → RLS → ACL → RAG
+-NextAuth para gerenciamento de sessão e autenticação
+-Roles definidas em ENUMs para controle de acesso a rotas e funcionalidades
+-Permissões (ACL) para controle granular de acesso a recursos
+-Sistema de permissões será reconstruído no novo backend
+
+====DESIGN SYSTEM - REGRAS OBRIGATÓRIAS====
+-SEMPRE usar classes semânticas: bg-card, text-foreground, text-muted-foreground, border, bg-muted
+-NUNCA usar cores hardcoded: bg-blue-500, text-gray-900, bg-white dark:bg-gray-800
+-Suporte automático a light/dark mode via classes semânticas
+-Componentes shadcn/ui em components/ui/ (Button, Card, Input, Dialog, etc)
+-Radix UI como base dos componentes
+-Framer Motion para animações suaves
+-Lucide React para todos os ícones
+-Ícones ASCII/emojis apenas para menus/sidebar
+-Ícones do framework (Lucide) para telas e cards
+-Tailwind CSS para estilização
+-shadcn/ui para componentes de UI
+-Cores e tipografia definidas via CSS variables e classes Tailwind semânticas
+-Modo claro/escuro implementado via next-themes
+
+====RESPONSIVIDADE====
+-Abordagem Mobile First obrigatória
+-Breakpoints: xs(475px), sm(640px), md(768px), lg(1024px), xl(1280px), 2xl(1536px)
+-Classes responsivas: w-full md:w-1/2 lg:w-1/3
+-Testar em mobile, tablet e desktop
+
+====PERFORMANCE E OTIMIZAÇÃO====
+-Server Components por padrão (menos JavaScript no client)
+-Suspense para loading states
+-Dynamic imports para code splitting de componentes pesados
+-Image component do Next.js para otimização automática
+-Lazy loading de componentes não críticos
+-Índices no banco para queries frequentes
+-Cache de dados quando aplicável
+-Uso de caches (LRU, Redis)
+-Minimizar re-renders em Client Components
+-Otimização de imagens
+
+====TRATAMENTO DE ERROS====
+-error.tsx em cada rota importante
+-Error boundaries para componentes client críticos
+-Feedback amigável ao usuário (nunca mensagens técnicas)
+-Log de erros para debugging
+-Fallbacks para estados de erro
+
+====TESTES====
+-Vitest para testes unitários e de integração
+-Playwright para testes end-to-end (e2e) e visuais
+-BDD (Behavior-Driven Development) para descrever funcionalidades
+-Testes devem cobrir a nova estrutura de chat e backend reconstruído
+
+====BOAS PRÁTICAS GERAIS====
+-Componentes < 300 linhas (quebrar em subcomponentes se maior)
+-Hooks < 150 linhas
+-Services < 200 linhas
+-Features BDD < 100 linhas
+-Um problema = uma solução focada (não múltiplas correções especulativas)
+-Responsabilidade única por módulo/componente
+-Interfaces claras entre módulos
+-Evolução incremental sem quebrar funcionalidades existentes
+-TypeScript obrigatório para tipagem forte
+-ESLint e Prettier para formatação e qualidade de código
+-Limitar complexidade de funções e componentes
+-Comentários claros e concisos onde necessário
+-Documentação inline para funções complexas
+
+====TYPESCRIPT====
+-Sempre tipar explicitamente props de componentes
+-Sempre tipar retornos de funções
+-Evitar 'any' (usar 'unknown' quando tipo é desconhecido)
+-Usar tipos do schema.ts via InferSelectModel
+-Strict mode habilitado
+-NoUncheckedIndexedAccess habilitado
+
+====GIT E VERSIONAMENTO====
+-Commits convencionais: feat:, fix:, docs:, refactor:, test:, chore:
+-SEMPRE perguntar antes de git commit/push
+-Branches: main (produção), fixes-* (correções), feature-* (novas features)
+-Pull requests obrigatórios para main
+-Review de código antes de merge
+-NUNCA force push em main/master
+-NUNCA skip hooks (--no-verify)
+
+====SEGURANÇA====
+-NUNCA hardcode: API keys, tokens, senhas, secrets
+-Sempre usar variáveis de ambiente (.env.local)
+-Adicionar .env.local ao .gitignore
+-Validar todos os inputs do usuário com Zod
+-Sanitizar dados antes de renderizar
+-Usar prepared statements (Drizzle faz automaticamente)
+-RLS (Row Level Security) habilitado em todas as tabelas sensíveis
+-ACL (Access Control List) para recursos compartilhados
+-Proteção contra XSS, CSRF
+-Uso de HTTPS
+-Tokens JWT para autenticação de APIs
+
+====DOCUMENTAÇÃO DE CÓDIGO====
+-JSDoc para funções públicas e complexas
+-Comentários para lógica não óbvia
+-README em features importantes
+-CHANGELOG para mudanças significativas
+-Manter documentação atualizada com código
+
+====VENDOR-AGNOSTIC - REGRAS CRÍTICAS====
+-SEMPRE preferir ecossistema Vercel (Next.js, AI SDK, Vercel packages)
+-NUNCA usar SDKs específicos de cloud (AWS SDK, Azure SDK direto, GCP SDK)
+-SEMPRE criar abstrações para funcionalidades cloud-specific
+-Configuration-driven (não hardcoded)
+-Providers configuráveis via environment variables
+
+====PRIORIDADES DA MIGRAÇÃO====
+1. Migrar v5/chat → /components/chat (estrutura modular)
+2. Eliminar dependências de v1/shared
+3. Reconstruir backend (schema, queries, migrations)
+4. Limpar componentes obsoletos (v1, v2, experimental)
+5. Organizar 50+ componentes soltos na raiz
+6. Consolidar sistemas (flow → workflows, generative-ui → chat core)
+7. Atualizar testes para nova estrutura
+8. Documentar APIs e componentes principais
+
+====ESTRUTURA FINAL DE /COMPONENTS/CHAT====
+/components/chat/
+  /core/                         # Funcionalidades essenciais
+    chat-container.tsx           # Container principal (< 300 linhas)
+    chat-messages.tsx            # Renderização de mensagens com AI SDK
+    chat-input.tsx               # Input básico (textarea nativo)
+    welcome-screen.tsx           # Tela de boas-vindas
+  /ai-elements/                  # AI SDK 5.0 Elements nativos
+    conversation.tsx             # Conversation wrapper oficial
+    message-renderer.tsx         # Renderizador com AI SDK Elements
+    response-handler.tsx         # Handler de respostas streaming
+    chain-of-thought.tsx         # Renderização de steps
+  /headers/                      # ✅ MANTER ChatHeaderV5 atual
+    chat-header-v5.tsx           # Header V5 com companion selector (MANTER)
+    animated-header.tsx          # Header com animações (limpo)
+  /skills/                       # Sistema de skills
+    skills-carousel.tsx          # Carrossel de skills
+    companion-selector.tsx       # Seletor de companions
+  /multimodal/                   # ✅ MANTER MultimodalInputV5 atual
+    multimodal-input-v5.tsx      # Input V5 com anexos/contexto/MCP (MANTER)
+    attachment-handler.tsx       # Handler de anexos (integrado no input)
+    preview-attachment.tsx       # Preview de arquivos (integrado no input)
+  /context/                      # Gerenciamento de contexto (LIMPO)
+    context-selector.tsx         # Seletor de contextos (sem v1/shared)
+    mcp-selector.tsx             # Seletor MCP (sem v1/shared)
+  /ui/                           # Componentes UI específicos
+    icons.tsx                    # Ícones (usa Lucide React, não v1/shared)
+    scroll-button.tsx            # Scroll to bottom
+    loading-indicator.tsx        # Indicadores de loading
+  /utils/                        # Utilitários e helpers
+    message-utils.ts             # Helpers de mensagens
+    chat-utils.ts                # Helpers gerais
+
+====HOOKS CUSTOMIZADOS PARA CHAT V0====
+/hooks/
+  use-chat-v0.ts                 # Hook principal (wrapper do useChat AI SDK 5.0)
+  use-chat-messages.ts           # Hook de gerenciamento de mensagens
+  use-companion-selector.ts      # Hook de seleção de companion
+  use-chat-state.ts              # Hook de estado do chat
+
+====API ROUTES PARA CHAT V0====
+/app/api/v0/
+  /chat/
+    route.ts                     # Endpoint principal (usa myProvider + streamText)
+
+====REGRAS CRÍTICAS CHAT V0====
+✅ SEMPRE:
+- MANTER MultimodalInputV5: Input atual com anexos, contexto e MCP (já funciona perfeitamente)
+- MANTER ChatHeaderV5: Header atual com companion selector (já funciona perfeitamente)
+- Usar AI SDK 5.0 Elements nativos (Conversation, Message, Response)
+- Usar myProvider.languageModel('chat-model') do lib/ai/providers.ts
+- Usar useChat hook nativo (nunca implementação custom)
+- Usar streamText para streaming (nunca implementação manual)
+- Usar Lucide React para ícones (nunca v1/shared/icons.tsx)
+- Usar shadcn/ui components (Button, Textarea, Card)
+- Usar cores semânticas (bg-card, text-foreground, border)
+- Componentes < 300 linhas (quebrar em subcomponentes)
+- Props tipadas explicitamente com TypeScript
+- Server Components por padrão, 'use client' apenas quando necessário
+
+❌ NUNCA:
+- Criar input multimodal custom (MANTER MultimodalInputV5 atual)
+- Criar header custom (MANTER ChatHeaderV5 atual)
+- Criar componentes custom de mensagens (USAR AI SDK Elements nativos)
+- Implementar streaming manualmente (USAR streamText do AI SDK)
+- Implementar tool calling manualmente (USAR tools object nativo)
+- Importar de ../../v1/shared/ (PROIBIDO)
+- Importar de ../../v1/chat/ (PROIBIDO)
+- Usar SDKs cloud-specific (AWS SDK, Azure SDK, GCP SDK)
+- Hardcodar IDs, API keys, tokens, valores
+- Usar cores hardcoded (bg-blue-500, text-gray-900)
+
+====TEMPLATE DE COMPONENTE CHAT V0====
+/**
+ * 🎯 [NOME] V0 - [Descrição]
+ * 
+ * ✅ COMPLIANCE CHECKLIST:
+ * - [x] [Server/Client] Component
+ * - [x] < 300 linhas
+ * - [x] Props tipadas explicitamente
+ * - [x] Cores semânticas (bg-card, text-foreground)
+ * - [x] Zero dependências V1/shared
+ * - [x] Ícones do Lucide React
+ * - [x] Usa AI SDK 5.0 Elements (se aplicável)
+ * 
+ * @module components/chat/[subpasta]/[arquivo]
+ */
+
+'use client'; // ou omitir para Server Component
+
+import { cn } from '@/lib/utils';
+import { IconName } from 'lucide-react'; // ✅ Lucide direto
+import type { Session } from 'next-auth';
+import React from 'react';
+
+interface ComponentNameProps {
+  /** Descrição da prop */
+  propName: string;
+  /** Sessão do usuário */
+  session: Session;
+  /** Classe CSS personalizada */
+  className?: string;
+}
+
+export function ComponentName({
+  propName,
+  session,
+  className,
+}: ComponentNameProps) {
+  return (
+    <div className={cn("base-classes", className)}>
+      {/* Conteúdo */}
+    </div>
+  );
+}
+
+====CHECKLIST PRÉ-COMMIT CHAT V0====
+**ARQUITETURA:**
+- [ ] Server Component por padrão (async se busca dados)?
+- [ ] Client Component marcado com 'use client'?
+- [ ] Componente < 300 linhas?
+- [ ] Lógica complexa em hooks customizados?
+
+**AI SDK 5.0:**
+- [ ] Usa myProvider.languageModel('chat-model')?
+- [ ] Usa useChat nativo (não custom)?
+- [ ] Usa streamText para streaming?
+- [ ] System prompts via 'system' parameter?
+- [ ] NUNCA implementa streaming manualmente?
+
+**VENDOR-AGNOSTIC:**
+- [ ] Usa ecossistema Vercel (Next.js + AI SDK)?
+- [ ] NUNCA usa SDKs cloud-specific?
+- [ ] Configuration-driven (env vars)?
+- [ ] Abstrações para cloud-specific features?
+
+**DESIGN SYSTEM:**
+- [ ] Cores semânticas (bg-card, text-foreground, border)?
+- [ ] NUNCA cores hardcoded (bg-blue-500)?
+- [ ] Componentes shadcn/ui (Button, Textarea)?
+- [ ] Ícones do Lucide React?
+- [ ] NUNCA ícones de v1/shared?
+
+**ZERO DEPS V1:**
+- [ ] NUNCA importa de ../../v1/shared/?
+- [ ] NUNCA usa AnimatedHeader de V1?
+- [ ] NUNCA usa icons.tsx de V1?
+- [ ] NUNCA usa ContextMultiSelector de V1?
+- [ ] NUNCA usa MCPMultiSelector de V1?
+- [ ] NUNCA usa PreviewAttachment de V1?
+
+**CONTEXTO E AUTH:**
+- [ ] Usa OrganizationContext (org + user)?
+- [ ] Usa session.user.id e session.user.organizationId?
+- [ ] NUNCA hardcode IDs, emails, tokens?
+- [ ] Validação com Zod antes de salvar?
+
+**BANCO DE DADOS:**
+- [ ] Queries em lib/db/queries.ts?
+- [ ] NUNCA query direto nos componentes?
+- [ ] Drizzle ORM (não SQL raw)?
+- [ ] Try/catch em todas as queries?
+- [ ] RLS habilitado para queries sensíveis?
+- [ ] ⚠️ VALIDOU estrutura contra Definicoes_banco_de_dados.txt?
+- [ ] ⚠️ VERIFICOU se tabelas/colunas existem no schema documentado?
+- [ ] ⚠️ VERIFICOU se relações (FKs) estão corretas?
+- [ ] ⚠️ VALIDOU tipos TypeScript com InferSelectModel?
+
+**TYPESCRIPT:**
+- [ ] Props tipadas explicitamente?
+- [ ] Retornos de funções tipados?
+- [ ] NUNCA usa 'any' (usar 'unknown')?
+- [ ] Tipos do schema via InferSelectModel?
+- [ ] Strict mode habilitado?
+
+**TESTES:**
+- [ ] Testes unitários para hooks?
+- [ ] Testes de integração para API?
+- [ ] Testes e2e para fluxo completo?
+- [ ] BDD features para comportamentos críticos?
+
+**DOCUMENTAÇÃO:**
+- [ ] JSDoc para funções públicas?
+- [ ] Comentários para lógica não óbvia?
+- [ ] README atualizado se nova feature?
+- [ ] CHANGELOG se mudança significativa?
+
+====CHECKLIST PRÉ-COMMIT GERAL====
+-[ ] Server Components onde possível?
+-[ ] Client Components marcados com 'use client'?
+-[ ] Queries centralizadas em queries.ts?
+-[ ] Types explícitos em props e retornos?
+-[ ] Cores semânticas (não hardcoded)?
+-[ ] AI SDK Elements para chat (não custom)?
+-[ ] OrganizationContext usado corretamente?
+-[ ] Validação com Zod para inputs?
+-[ ] Tratamento de erros adequado?
+-[ ] Componente < 300 linhas?
+-[ ] ESLint sem warnings?
+-[ ] TypeScript sem erros (npm run type-check)?
+-[ ] Testado manualmente?
+-[ ] Não hardcodou secrets/keys?
+-[ ] Usa configurações do env.local?
+-[ ] Vendor-agnostic (sem SDKs cloud-specific)?

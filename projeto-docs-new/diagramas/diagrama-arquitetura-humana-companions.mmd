@@ -1,0 +1,73 @@
+graph TB
+    %% Organizações e Estrutura Principal
+    ORG[🏢 HU_Organization<br/>• id, name, createdAt, isActive, inviteCode]
+    WS[💼 HU_Workspace<br/>• id, orgId, name, type, isDefault, isActive]
+    WU[🔗 WorkspaceUsers<br/>• id, workspaceId, userId, role, joinedAt]
+    USER[👥 User<br/>• id, email, name, role, createdAt, isActive]
+    
+    %% Sistema de Chat
+    CHAT[💬 Chats<br/>• id, userId, workspaceId, title, createdAt]
+    ART[📄 Artifacts<br/>• id, chatId, type, content, createdAt]
+    
+    %% Sistema de Agentes
+    CAMP[🤖 Camps<br/>• id, orgId, name, description, createdAt]
+    SKILL[⚡ Skills<br/>• id, campId, name, description, createdAt]
+    PROCESS[⚙️ ProcessSteps<br/>• id, skillId, name, order, createdAt]
+    
+    %% Conhecimento e Ferramentas
+    RAG[🧠 KnowledgeRAG<br/>• id, workspaceId, source, content, createdAt]
+    MCP[🔧 ToolsMCP<br/>• id, workspaceId, name, type, config]
+    
+    %% Controle de Acesso
+    ACL[🔐 PermissionsACL<br/>• id, userId, resourceId, action, permission]
+    
+    %% Enums
+    ENUMS[📋 ENUMS<br/>• userRole<br/>• workspaceTypeEnum<br/>• resourceTypeEnum<br/>• actionTypeEnum]
+    
+    %% Relacionamentos Principais
+    ORG -->|possui| WS
+    WS -->|tem| WU
+    WU -->|pertence| USER
+    USER -->|inicia| CHAT
+    CHAT -->|gera| ART
+    
+    %% Sistema de Agentes
+    ORG -->|cria| CAMP
+    CAMP -->|contém| SKILL
+    SKILL -->|executa| PROCESS
+    
+    %% Conhecimento e Ferramentas
+    WS -->|tem| RAG
+    WS -->|usa| MCP
+    
+    %% Controle de Acesso
+    USER -->|tem| ACL
+    
+    %% Context Injection (fluxo principal)
+    RAG -.->|Context Injection| PROCESS
+    MCP -.->|Tool Execution| PROCESS
+    
+    %% Relacionamento Contextual
+    WS -.->|contexto| CHAT
+    
+    %% Estilos
+    classDef orgStyle fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    classDef workspaceStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px
+    classDef userStyle fill:#e8f5e8,stroke:#388e3c,stroke-width:3px
+    classDef chatStyle fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+    classDef agentStyle fill:#fce4ec,stroke:#c2185b,stroke-width:3px
+    classDef knowledgeStyle fill:#e0f2f1,stroke:#00695c,stroke-width:3px
+    classDef permissionStyle fill:#fff8e1,stroke:#f9a825,stroke-width:3px
+    classDef junctionStyle fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+    classDef enumStyle fill:#f8f9fa,stroke:#6c757d,stroke-width:2px
+    
+    %% Aplicar estilos
+    class ORG orgStyle
+    class WS workspaceStyle
+    class USER userStyle
+    class CHAT,ART chatStyle
+    class CAMP,SKILL,PROCESS agentStyle
+    class RAG,MCP knowledgeStyle
+    class ACL permissionStyle
+    class WU junctionStyle
+    class ENUMS enumStyle
