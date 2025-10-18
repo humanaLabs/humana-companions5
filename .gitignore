@@ -41,3 +41,9 @@ yarn-error.log*
 /playwright-report/
 /blob-report/
 /playwright/*
+
+# Electron
+electron-dist/
+electron/**/*.js
+electron/**/*.js.map
+!electron/builder/**
