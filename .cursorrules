@@ -1,0 +1,52 @@
+# Regras do Projeto Humana Companions
+
+## Electron
+
+### Organização de Código
+- **IMPORTANTE**: Qualquer arquivo ou funcionalidade relacionada ao Electron deve ser criado/alterado exclusivamente dentro do diretório `electron/`, salvo exceções estritamente necessárias.
+- Exceções válidas incluem:
+  - Configuração no `package.json` (scripts, build config)
+  - Ajustes no `.gitignore` para ignorar arquivos gerados
+  - Documentação em `docs/` ou raiz do projeto
+  - Tipos globais que precisam ser acessíveis pelo Next.js
+
+### Estrutura do Electron
+```
+electron/
+├── main/           # Processo principal (código que roda no Node.js)
+├── preload/        # Scripts de preload (ponte entre main e renderer)
+├── types/          # Definições TypeScript específicas do Electron
+├── builder/        # Recursos para electron-builder (ícones, etc)
+└── tsconfig.json   # Configuração TypeScript do Electron
+```
+
+### Separação de Responsabilidades
+- **Processo Main** (`electron/main/`): Lógica do sistema operacional, janelas, IPC handlers
+- **Preload** (`electron/preload/`): APIs seguras expostas via contextBridge
+- **Renderer** (Next.js): Interface do usuário, lógica de negócio
+- **NUNCA** misturar código do Electron com código do Next.js fora das exceções listadas
+
+### Segurança
+- Manter sempre `contextIsolation: true`
+- Manter sempre `nodeIntegration: false`
+- Manter sempre `sandbox: true`
+- Nunca expor APIs perigosas via contextBridge
+- Validar todas as entradas vindas do renderer
+
+### Comunicação
+- Usar IPC (Inter-Process Communication) para comunicação entre main e renderer
+- Expor APIs via `contextBridge.exposeInMainWorld()` no preload
+- Nunca expor objetos completos do Electron (apenas métodos específicos)
+
+## Next.js + Electron
+
+### Detecção de Ambiente
+- Usar `window.env?.isElectron` para detectar se está rodando no Electron
+- Código específico do Electron deve ser condicional ou em arquivos separados
+- Evitar depender de features do Electron no código web
+
+### Build
+- Build do Next.js deve funcionar independentemente do Electron
+- Build do Electron inclui o build do Next.js
+- Arquivos compilados do Electron (`.js`, `.js.map`) devem ser ignorados no git
+
