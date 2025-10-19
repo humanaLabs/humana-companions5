@@ -1,0 +1,21 @@
+# Electron files
+electron/
+electron-dist/
+
+# Build artifacts
+*.asar
+*.exe
+*.dmg
+*.AppImage
+
+# Documentation
+projeto-docs-new/
+docs/
+
+# Test files
+tests/
+
+# Development files
+run-electron.bat
+start-electron.ps1
+

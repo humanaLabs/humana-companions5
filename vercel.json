@@ -1,0 +1,26 @@
+{
+  "buildCommand": "pnpm build",
+  "functions": {
+    "app/(chat)/api/**/*.ts": {
+      "maxDuration": 60
+    },
+    "app/(chatv1)/api/**/*.ts": {
+      "maxDuration": 60
+    },
+    "app/(chatv2)/api/**/*.ts": {
+      "maxDuration": 60
+    },
+    "app/(chatv3)/api/**/*.ts": {
+      "maxDuration": 60
+    },
+    "app/(chatv4)/api/**/*.ts": {
+      "maxDuration": 60
+    },
+    "app/(chatv5)/api/**/*.ts": {
+      "maxDuration": 60
+    },
+    "app/(auth)/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  }
+}
