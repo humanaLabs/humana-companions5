@@ -13,5 +13,5 @@ export function getStartUrl(): string {
   }
 
   // Em produção, usa variável de ambiente ou fallback
-  return process.env.ELECTRON_START_URL || "https://chat.vercel.ai";
+  return process.env.ELECTRON_START_URL || "https://chat.humana.ai";
 }

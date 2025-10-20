@@ -44,7 +44,7 @@ export function createWindow(): BrowserWindow {
     const allowedOrigins = [
       "http://localhost:3000",
       "http://localhost:3001",
-      process.env.ELECTRON_START_URL || "https://chat.vercel.ai",
+      process.env.ELECTRON_START_URL || "https://chat.humana.ai",
     ];
 
     const allowed = allowedOrigins.some((origin) => url.startsWith(origin));
