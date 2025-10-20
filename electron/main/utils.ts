@@ -7,11 +7,11 @@ export function npxCmd(): string {
 }
 
 export function getStartUrl(): string {
-  // Em desenvolvimento, tenta localhost primeiro
-  // Usa variável de ambiente ou default para localhost:3000
-  if (isDevelopment() || !process.env.ELECTRON_START_URL) {
+  // Em desenvolvimento, usa localhost
+  if (isDevelopment()) {
     return process.env.ELECTRON_START_URL || "http://localhost:3000";
   }
-  return "https://chat.vercel.ai";
-}
 
+  // Em produção, usa variável de ambiente ou fallback
+  return process.env.ELECTRON_START_URL || "https://chat.vercel.ai";
+}

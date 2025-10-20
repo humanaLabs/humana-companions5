@@ -130,6 +130,7 @@
     "appId": "com.humana.companions",
     "productName": "Humana Companions",
     "npmRebuild": false,
+    "asar": false,
     "directories": {
       "output": "electron-dist",
       "buildResources": "electron/builder"
@@ -141,9 +142,6 @@
       "node_modules/**/*",
       "package.json",
       "public/**/*"
-    ],
-    "asarUnpack": [
-      "node_modules/**/*.node"
     ],
     "win": {
       "target": [

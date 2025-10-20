@@ -14,7 +14,7 @@ export function createWindow(): BrowserWindow {
       preload: path.join(__dirname, "../preload/index.js"),
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: true,
+      sandbox: false, // Desabilitar para preload funcionar com páginas remotas (Vercel)
       webSecurity: true,
       allowRunningInsecureContent: false,
     },
@@ -44,7 +44,7 @@ export function createWindow(): BrowserWindow {
     const allowedOrigins = [
       "http://localhost:3000",
       "http://localhost:3001",
-      "https://chat.vercel.ai",
+      process.env.ELECTRON_START_URL || "https://chat.vercel.ai",
     ];
 
     const allowed = allowedOrigins.some((origin) => url.startsWith(origin));
@@ -75,4 +75,3 @@ export function createWindow(): BrowserWindow {
 
   return window;
 }
-

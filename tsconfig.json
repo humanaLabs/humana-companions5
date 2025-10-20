@@ -19,7 +19,11 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/electron/runtime/detection": ["./lib/electron-stub"],
+      "@/electron/runtime/electron-client": ["./lib/electron-stub"],
+      "@/electron/runtime/computer-use-client": ["./lib/electron-stub"],
+      "@/electron/runtime/mcp-client": ["./lib/electron-stub"]
     },
     "strictNullChecks": true
   },
