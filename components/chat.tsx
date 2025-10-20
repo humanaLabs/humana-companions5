@@ -133,6 +133,9 @@ export function Chat({
       api: `/api/${apiVersion}/chat`,
       fetch: fetchWithErrorHandlers,
       prepareSendMessagesRequest(request) {
+        console.log(
+          `[Chat Component] 📤 Preparing request, current status: ${status}`
+        );
         return {
           body: {
             id: request.id,
@@ -151,9 +154,13 @@ export function Chat({
       }
     },
     onFinish: () => {
+      console.log(
+        "[Chat Component] ✅ onFinish called, status should be 'ready' now"
+      );
       mutate(unstable_serialize(getChatHistoryPaginationKey(apiVersion)));
     },
     onError: (error) => {
+      console.log("[Chat Component] ❌ onError called:", error);
       if (error instanceof ChatSDKError) {
         // Check if it's a credit card error
         if (
@@ -169,6 +176,11 @@ export function Chat({
       }
     },
   });
+
+  // Monitor status changes
+  useEffect(() => {
+    console.log(`[Chat Component] 📊 Status changed to: "${status}"`);
+  }, [status]);
 
   const searchParams = useSearchParams();
   const query = searchParams.get("query");

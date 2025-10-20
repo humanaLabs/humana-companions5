@@ -29,7 +29,7 @@ export const AnimatedResponse = memo(
       // Apply initial animation to all elements
       const applyInitialAnimation = () => {
         const allElements = container.querySelectorAll("*");
-        allElements.forEach((element) => {
+        for (const element of allElements) {
           if (
             element instanceof HTMLElement &&
             !processedNodesRef.current.has(element)
@@ -46,15 +46,15 @@ export const AnimatedResponse = memo(
               element.style.filter = "";
             }, 500);
           }
-        });
+        }
       };
 
       // Apply animation to new nodes during streaming
       const applyBlurToNewNodes = (mutations: MutationRecord[]) => {
-        mutations.forEach((mutation) => {
-          mutation.addedNodes.forEach((node) => {
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
             if (processedNodesRef.current.has(node)) {
-              return;
+              continue;
             }
 
             if (node.nodeType === Node.ELEMENT_NODE) {
@@ -72,7 +72,7 @@ export const AnimatedResponse = memo(
                 element.style.filter = "";
               }, 500);
             }
-          });
+          }
 
           if (
             mutation.type === "characterData" &&
@@ -89,7 +89,7 @@ export const AnimatedResponse = memo(
               }, 500);
             }
           }
-        });
+        }
       };
 
       // Small delay to ensure DOM is ready

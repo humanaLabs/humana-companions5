@@ -3,12 +3,18 @@ import {
   convertToModelMessages,
   createUIMessageStream,
   JsonToSseTransformStream,
+  streamText,
 } from "ai";
 import { auth, type UserType } from "@/app/(auth)/auth";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/v2/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/v2/prompts";
+import { myProvider } from "@/lib/ai/v2/providers";
+import { createDocument } from "@/lib/ai/v2/tools/create-document";
+import { getWeather } from "@/lib/ai/v2/tools/get-weather";
+import { requestSuggestions } from "@/lib/ai/v2/tools/request-suggestions";
+import { updateDocument } from "@/lib/ai/v2/tools/update-document";
 import {
   deleteChatById,
   getChatById,
@@ -25,15 +31,18 @@ import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
 export const maxDuration = 60;
 
-const N8N_WEBHOOK_URL = "https://n8n.humana.ai/webhook/chat/completions";
-
 export async function POST(request: Request) {
+  const requestId = `req-${Date.now()}`;
+  console.log(`[Chat API V2] 🆕 NEW REQUEST ${requestId} received`);
+
   let requestBody: PostRequestBody;
 
   try {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
+    console.log(`[Chat API V2] ${requestId} - Request body parsed`);
   } catch (_) {
+    console.log(`[Chat API V2] ${requestId} - ❌ Bad request`);
     return new ChatSDKError("bad_request:api").toResponse();
   }
 
@@ -50,6 +59,7 @@ export async function POST(request: Request) {
       selectedVisibilityType: VisibilityType;
     } = requestBody;
 
+    console.log(`[Chat API V2] ${requestId} - Chat ID: ${id}`);
     const session = await auth();
 
     if (!session?.user) {
@@ -112,179 +122,80 @@ export async function POST(request: Request) {
     });
 
     const stream = createUIMessageStream({
-      execute: async ({ writer: dataStream }) => {
-        const systemPromptText = systemPrompt({
-          selectedChatModel,
-          requestHints,
+      execute: ({ writer: dataStream }) => {
+        console.log("[Chat API V2] Using native streamText with n8n provider");
+
+        const result = streamText({
+          model: myProvider.languageModel(selectedChatModel),
+          system: systemPrompt({
+            selectedChatModel,
+            requestHints,
+          }),
+          messages: convertToModelMessages(uiMessages),
+          experimental_activeTools:
+            selectedChatModel === "chat-model-reasoning"
+              ? []
+              : [
+                  "getWeather",
+                  "createDocument",
+                  "updateDocument",
+                  "requestSuggestions",
+                ],
+          tools: {
+            getWeather,
+            createDocument: createDocument({
+              session,
+              dataStream,
+            }),
+            updateDocument: updateDocument({
+              session,
+              dataStream,
+            }),
+            requestSuggestions: requestSuggestions({
+              session,
+              dataStream,
+            }),
+          },
+          onFinish: ({ text, toolCalls, finishReason, toolResults }) => {
+            console.log("[Chat API V2] ✅ Generation finished!");
+            console.log("[Chat API V2] - Text:", text?.substring(0, 100));
+            console.log("[Chat API V2] - Tool calls:", toolCalls?.length || 0);
+            if (toolCalls && toolCalls.length > 0) {
+              console.log(
+                "[Chat API V2] - Tool calls details:",
+                JSON.stringify(toolCalls, null, 2)
+              );
+            }
+            console.log(
+              "[Chat API V2] - Tool results:",
+              toolResults?.length || 0
+            );
+            if (toolResults && toolResults.length > 0) {
+              console.log(
+                "[Chat API V2] - Tool results details:",
+                JSON.stringify(toolResults, null, 2)
+              );
+            }
+            console.log("[Chat API V2] - Finish reason:", finishReason);
+          },
         });
 
-        console.log("[Chat API V2] Calling n8n directly");
+        console.log("[Chat API V2] Consuming stream from n8n provider...");
+        result.consumeStream();
 
-        // Preparar mensagens
-        const n8nMessages = [
-          { role: "system", content: systemPromptText },
-          ...convertToModelMessages(uiMessages).map((msg) => {
-            let content = "";
-            if (Array.isArray(msg.content)) {
-              content = msg.content
-                .map((part) => {
-                  if (part.type === "text") {
-                    return part.text;
-                  }
-                  return "";
-                })
-                .join("\n");
-            } else if (typeof msg.content === "string") {
-              content = msg.content;
-            }
-            return {
-              role: msg.role,
-              content,
-            };
-          }),
-        ];
+        console.log("[Chat API V2] Merging UI stream...");
 
-        // Definir tools em formato OpenAI
-        const tools = [
-          {
-            type: "function",
-            function: {
-              name: "getWeather",
-              description: "Get the current weather at a location",
-              parameters: {
-                type: "object",
-                properties: {
-                  latitude: { type: "number" },
-                  longitude: { type: "number" },
-                },
-                required: ["latitude", "longitude"],
-              },
-            },
-          },
-        ];
-
-        // Chamar n8n
-        const response = await fetch(N8N_WEBHOOK_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: selectedChatModel,
-            stream: true,
-            messages: n8nMessages,
-            tools,
-          }),
+        const uiStream = result.toUIMessageStream({
+          sendReasoning: true,
         });
 
-        if (!response.ok) {
-          throw new Error(`N8n API error: ${response.status}`);
-        }
-
-        if (!response.body) {
-          throw new Error("Response body is null");
-        }
-
-        console.log("[Chat API V2] Streaming from n8n...");
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-        let fullText = "";
-
-        const textStepId = generateUUID();
-        let hasStartedText = false;
-
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-
-            if (done) {
-              console.log("[Chat API V2] Stream done");
-              break;
-            }
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
-
-            for (const line of lines) {
-              const trimmedLine = line.trim();
-
-              if (!trimmedLine || trimmedLine === "data: [DONE]") {
-                continue;
-              }
-
-              if (trimmedLine.startsWith("data:")) {
-                const jsonStr = trimmedLine.slice(5).trim();
-
-                if (!jsonStr) {
-                  continue;
-                }
-
-                try {
-                  const data = JSON.parse(jsonStr);
-                  const delta = data.choices?.[0]?.delta;
-
-                  // Processar texto
-                  let content = delta?.content;
-
-                  if (!content && typeof data.content === "string") {
-                    content = data.content;
-                  }
-
-                  if (!content && typeof data.output === "string") {
-                    content = data.output;
-                  }
-
-                  if (content) {
-                    console.log("[Chat API V2] Text chunk:", content);
-                    fullText += content;
-
-                    // Enviar como parte da mensagem, não annotation
-                    if (!hasStartedText) {
-                      dataStream.write({
-                        type: "text-start",
-                        id: textStepId,
-                      });
-                      hasStartedText = true;
-                    }
-
-                    dataStream.write({
-                      type: "text-delta",
-                      delta: content,
-                      id: textStepId,
-                    });
-                  }
-
-                  // TODO: Processar tool calls
-                  if (delta?.tool_calls) {
-                    console.log("[Chat API V2] Tool calls:", delta.tool_calls);
-                  }
-                } catch (e) {
-                  console.error("[Chat API V2] Parse error:", e);
-                }
-              }
-            }
-          }
-        } finally {
-          reader.releaseLock();
-        }
-
-        // Finalizar texto
-        if (hasStartedText) {
-          dataStream.write({
-            type: "text-end",
-            id: textStepId,
-          });
-        }
-
-        console.log("[Chat API V2] Full text:", fullText);
+        dataStream.merge(uiStream);
+        console.log("[Chat API V2] ✅ UI stream merged into dataStream");
       },
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
         console.log(
-          "[Chat API V2] onFinish - Saving",
+          "[Chat API V2] 🎯 onFinish callback called - Saving",
           messages.length,
           "messages"
         );
@@ -305,9 +216,13 @@ export async function POST(request: Request) {
       },
     });
 
-    console.log("[Chat API V2] Returning stream");
+    console.log("[Chat API V2] 📤 Returning SSE stream to client");
 
-    return new Response(stream.pipeThrough(new JsonToSseTransformStream()));
+    const response = new Response(
+      stream.pipeThrough(new JsonToSseTransformStream())
+    );
+    console.log("[Chat API V2] ✅ Response created successfully");
+    return response;
   } catch (error) {
     const vercelId = request.headers.get("x-vercel-id");
 
